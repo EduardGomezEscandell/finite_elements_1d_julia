@@ -44,14 +44,14 @@ function assemble(self::Condition, system::SystemOfEquations, shape_fun::ShapeFu
 end
 
 
-function build(mesh::Mesh, shape_functions::ShapeFunctions, gauss_data::GaussData, conductivity::Float64, source::Function)
+function build(mesh::Mesh, shape_functions::ShapeFunctions, gauss_data::GaussData, diffusivity::Float64, source::Function)
     nnodes = size(mesh.nodes)[1]
     system = SystemOfEquations(nnodes)
     for e in mesh.elems
-        assemble(e, system, shape_functions, gauss_data, conductivity, source)
+        assemble(e, system, shape_functions, gauss_data, diffusivity, source)
     end
     for c in mesh.conds
-        assemble(c, system, shape_functions, gauss_data, conductivity, source)
+        assemble(c, system, shape_functions, gauss_data, diffusivity, source)
     end
     return system
 end
