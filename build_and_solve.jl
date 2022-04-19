@@ -1,0 +1,71 @@
+mutable struct SystemOfEquations
+    mat::Matrix{Float64}
+    vec::Vector{Float64}
+    sol::Vector{Float64}
+    locked_dofs::Vector{Integer}
+end
+
+function SystemOfEquations(nnodes::Int)
+    return SystemOfEquations(zeros(Float64, nnodes, nnodes), zeros(Float64, nnodes), zeros(Float64, nnodes), [])
+end
+
+function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Float64, f=Function)
+    x = self.nodes[1].x .+ (self.nodes[2].x - self.nodes[1].x) * (gauss_data.points .+ 1) / 2
+    fevald = f(x)
+
+    Klocal = k .* reduce(+, shape_fun.B[:, i] .* transpose(shape_fun.B[:, i]) .* gauss_data.weights[i] for i=1:gauss_data.size)
+    Flocal = reduce(+, fevald[i] .* shape_fun.N[:, i]  .* gauss_data.weights[i] for i=1:gauss_data.size)
+
+    jacobian = (self.nodes[2].x - self.nodes[1].x) / 2
+    Klocal .*= jacobian
+    Flocal .*= jacobian
+
+    i = 1
+    for n in self.nodes
+        j = 1
+        for m in self.nodes
+            system.mat[n.id, m.id] += Klocal[i, j]
+            j += 1
+        end
+        system.vec[n.id] += Flocal[i]
+        i += 1
+    end
+end
+
+function assemble(self::Condition, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Float64, f=Function)
+
+    if self.type == DIRICHLET
+        push!(system.locked_dofs, self.node.id)
+        system.sol[self.node.id] = self.value
+        return
+    end
+
+    error("Neumann boundary conditions not implemented")
+end
+
+
+function build(mesh::Mesh, shape_functions::ShapeFunctions, gauss_data::GaussData, conductivity::Float64, source::Function)
+    nnodes = size(mesh.nodes)[1]
+    system = SystemOfEquations(nnodes)
+    for e in mesh.elems
+        assemble(e, system, shape_functions, gauss_data, conductivity, source)
+    end
+    for c in mesh.conds
+        assemble(c, system, shape_functions, gauss_data, conductivity, source)
+    end
+    return system
+end
+
+
+function solve(self::SystemOfEquations)
+    free_dofs = setdiff(1:size(self.mat)[1], self.locked_dofs)
+    Aff = view(self.mat, free_dofs, free_dofs)
+    Afl = view(self.mat, free_dofs, self.locked_dofs)
+    ul = view(self.sol, self.locked_dofs)
+    bf = view(self.vec, free_dofs)
+
+    lhs = Aff
+    rhs = bf - Afl * ul
+
+    system.sol[free_dofs] = lhs \ rhs
+end
