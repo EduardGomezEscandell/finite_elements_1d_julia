@@ -72,5 +72,5 @@ function solve(self::SystemOfEquations)
     lhs = Aff
     rhs = bf - Afl * ul
 
-    system.sol[free_dofs] = lhs \ rhs
+    self.sol[free_dofs] = lhs \ rhs
 end
