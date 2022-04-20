@@ -1,4 +1,9 @@
+#!/bin/bash
+#=
+exec julia -i --compile=min "${BASH_SOURCE[0]}" "$@"
+=#
 # Finite element program
+#-----------------------
 # Solves 1D equations of type
 #
 #       -∇·k∇u = f
@@ -12,29 +17,32 @@ include("src/gauss.jl")
 include("src/shape_fun.jl")
 include("src/mesh.jl")
 include("src/build_and_solve.jl")
+include("src/post_process.jl")
 
 function main()
+    println("Starting Finite Element program")
     ## Settings
     # Numerical settings
-    n_gauss = 3
-    polynomial_order = 2
-    nelems = 10
+    nelems = 10                         # Number of elements
+    polynomial_order = 3                # Polynomial order of the elements
+    n_gauss_numerical = 3               # Gauss interpolation for integration
+    n_gauss_plotting = 7                # Gauss interpolation for plotting solution
 
     # Domain settings
-    length = 1.0
-    left_bc = NEUMANN, -1.0
-    right_bc = DIRICHLET, 2.0
+    length = 1.0                        # Size of the domain
+    left_bc = NEUMANN, -1.0             # Left boundary condition
+    right_bc = DIRICHLET, -2.0          # Right boundary condition
 
     # Physical settings
-    source(x) = - 100 * sin.(2*pi*x)
-    diffusivity = 1.0
+    source(x) = - 100 * cos.(3*pi*x)    # Source term f
+    diffusivity = 1.0                   # Diffusivity constant k
 
     ## Meshing
     mesh = generate_mesh(nelems, polynomial_order, length, left_bc, right_bc)
     println("Meshing completed")
 
     # Precomputing data
-    gauss_data = get_gauss_quadrature(n_gauss)
+    gauss_data = get_gauss_quadrature(n_gauss_numerical)
     shape_functions = compute_shape_functions(polynomial_order, gauss_data)
     println("Preliminaries completed")
 
@@ -47,9 +55,12 @@ function main()
     println("Solving completed")
 
     # Output
-    println("\nSolution:")
-    display(system.sol)
-    println()
+    plotting_gauss = get_gauss_quadrature(n_gauss_plotting)
+    plotting_shape_fun = compute_shape_functions(polynomial_order, plotting_gauss)
+    p = plot_solution(mesh, system.sol, plotting_shape_fun, plotting_gauss)
+
+    return (mesh, system.sol, p)
 end
 
-main()
+(mesh, solution, p) = main()
+display(p)
