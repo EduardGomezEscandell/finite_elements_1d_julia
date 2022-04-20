@@ -5,7 +5,12 @@ struct GaussData
 end
 
 function get_gauss_quadrature(npoints::Integer)
-    if npoints == 2
+    if npoints == 1
+        return GaussData(1,
+            [ 2.0000000000000000 ],
+            [ 0.0000000000000000 ]
+        )
+    elseif npoints == 2
         return GaussData(2,
             [ 1.0000000000000000,  1.0000000000000000],
             [-0.5773502691896257,  0.5773502691896257]

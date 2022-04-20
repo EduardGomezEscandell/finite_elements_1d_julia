@@ -1,5 +1,7 @@
 # Finite element program
-# Solves 1D equations of type ∇·k∇u = f
+# Solves 1D equations of type
+#
+#       -∇·k∇u = f
 #
 # k is the diffusivity
 # f is the source term
@@ -13,17 +15,17 @@ include("src/build_and_solve.jl")
 
 ## Settings
 # Numerical settings
-n_gauss = 4
-polynomial_order = 3
-nelems = 2
+n_gauss = 3
+polynomial_order = 2
+nelems = 10
 
 # Domain settings
-length = 2.0
+length = 1.0
 left_bc = DIRICHLET, 0.0
-right_bc = DIRICHLET, 0.0
+right_bc = DIRICHLET, 3.0
 
 # Physical settings
-source(x) = 1.0 .* ones(size(x))
+source(x) = 100 * sin.(2*pi*x)
 diffusivity = 1.0
 
 ## Meshing
