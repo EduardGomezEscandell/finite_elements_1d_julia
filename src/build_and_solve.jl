@@ -9,7 +9,7 @@ function SystemOfEquations(nnodes::Int)
     return SystemOfEquations(zeros(Float64, nnodes, nnodes), zeros(Float64, nnodes), zeros(Float64, nnodes), [])
 end
 
-function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Float64, f=Function)
+function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Float64, f::Function)
     nnodes = size(self.nodes, 1)
     L = self.nodes[nnodes].x - self.nodes[1].x
     jacobian = L / 2
@@ -37,7 +37,7 @@ function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunc
     end
 end
 
-function assemble(self::Condition, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Float64, f=Function)
+function assemble(self::Condition, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Float64, f::Function)
 
     if self.type == DIRICHLET
         push!(system.locked_dofs, self.node.id)
