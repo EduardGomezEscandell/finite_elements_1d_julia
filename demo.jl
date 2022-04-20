@@ -22,11 +22,11 @@ function main()
 
     # Domain settings
     length = 1.0
-    left_bc = DIRICHLET, 0.0
-    right_bc = DIRICHLET, 3.0
+    left_bc = NEUMANN, -1.0
+    right_bc = DIRICHLET, 2.0
 
     # Physical settings
-    source(x) = 100 * sin.(2*pi*x)
+    source(x) = - 100 * sin.(2*pi*x)
     diffusivity = 1.0
 
     ## Meshing

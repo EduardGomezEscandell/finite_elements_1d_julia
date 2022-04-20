@@ -37,15 +37,15 @@ function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunc
     end
 end
 
-function assemble(self::Condition, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Float64, f::Function)
+function assemble(self::Condition, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Float64)
 
     if self.type == DIRICHLET
         push!(system.locked_dofs, self.node.id)
         system.sol[self.node.id] = self.value
-        return
+    elseif self.type == NEUMANN
+        Flocal = self.normal * self.value
+        system.vec[self.node.id] += Flocal
     end
-
-    error("Neumann boundary conditions not implemented")
 end
 
 
@@ -56,7 +56,7 @@ function build(mesh::Mesh, shape_functions::ShapeFunctions, gauss_data::GaussDat
         assemble(e, system, shape_functions, gauss_data, diffusivity, source)
     end
     for c in mesh.conds
-        assemble(c, system, shape_functions, gauss_data, diffusivity, source)
+        assemble(c, system, shape_functions, gauss_data, diffusivity)
     end
     return system
 end
