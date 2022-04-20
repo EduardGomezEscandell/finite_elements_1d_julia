@@ -25,7 +25,7 @@ end
 
 function generate_mesh(nelems::Integer, polynomial_order::Integer, length::Float64)
     nnodes = nelems*polynomial_order + 1
-    nodes = [DofNode(i, i*length/nnodes) for i=1:nnodes]
+    nodes = [DofNode(i, (i-1)*length/(nnodes-1)) for i=1:nnodes]
     elems = [Element(el, nodes[(el-1)*polynomial_order+1:el*polynomial_order+1]) for el=1:nelems]
     conds = [Condition(1, nodes[1],      left_bc[1],  left_bc[2]),
             Condition(2, nodes[nnodes], right_bc[1], right_bc[2])]

@@ -10,13 +10,18 @@ function SystemOfEquations(nnodes::Int)
 end
 
 function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Float64, f=Function)
-    x = self.nodes[1].x .+ (self.nodes[2].x - self.nodes[1].x) * (gauss_data.points .+ 1) / 2
-    fevald = f(x)
+    nnodes = size(self.nodes, 1)
+    L = self.nodes[nnodes].x - self.nodes[1].x
+    jacobian = L / 2
 
-    Klocal = k .* reduce(+, shape_fun.B[:, i] .* transpose(shape_fun.B[:, i]) .* gauss_data.weights[i] for i=1:gauss_data.size)
-    Flocal = reduce(+, fevald[i] .* shape_fun.N[:, i]  .* gauss_data.weights[i] for i=1:gauss_data.size)
+    x = self.nodes[1].x .+ L * (gauss_data.points .+ 1) / 2
 
-    jacobian = (self.nodes[2].x - self.nodes[1].x) / 2
+    B = shape_fun.B ./ jacobian
+    f_gauss = f(x)
+
+    Klocal = k .* reduce(+, B[:, i] .* transpose(B[:, i]) .* gauss_data.weights[i] for i=1:gauss_data.size)
+    Flocal = reduce(+, f_gauss[i] .* shape_fun.N[:, i]  .* gauss_data.weights[i] for i=1:gauss_data.size)
+
     Klocal .*= jacobian
     Flocal .*= jacobian
 

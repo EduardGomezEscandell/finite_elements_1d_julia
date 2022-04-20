@@ -7,8 +7,8 @@ function compute_shape_functions(interp_order::Integer, gauss_data::GaussData)
     if interp_order == 1
         w1(ξ) = [(1 - ξ) / 2;
                  (1 + ξ) / 2]
-        dw1(ξ) = [-ξ/2;
-                   ξ/2]
+        dw1(ξ) = [-1/2;
+                   1/2]
         return generate_N(w1, dw1, gauss_data)
     elseif interp_order == 2
         w2(ξ) = [-0.5*ξ*(1-ξ);
