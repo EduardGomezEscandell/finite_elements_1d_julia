@@ -35,7 +35,7 @@ function main()
 
     # Physical settings
     source(x) = - 100 * cos.(3*pi*x)    # Source term f
-    diffusivity = 1.0                   # Diffusivity constant k
+    diffusivity(x) = 1                  # Diffusivity constant k
 
     ## Meshing
     mesh = generate_mesh(nelems, polynomial_order, length, left_bc, right_bc)

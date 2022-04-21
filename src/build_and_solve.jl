@@ -9,7 +9,7 @@ function SystemOfEquations(nnodes::Int)
     return SystemOfEquations(zeros(Float64, nnodes, nnodes), zeros(Float64, nnodes), zeros(Float64, nnodes), [])
 end
 
-function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Float64, f::Function)
+function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Function, f::Function)
     nnodes = size(self.nodes, 1)
     L = self.nodes[nnodes].x - self.nodes[1].x
     jacobian = L / 2
@@ -18,9 +18,17 @@ function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunc
 
     B = shape_fun.B ./ jacobian
     f_gauss = f(x)
+    k_gauss = k(x)
 
-    Klocal = k .* reduce(+, B[:, i] .* transpose(B[:, i]) .* gauss_data.weights[i] for i=1:gauss_data.size)
-    Flocal = reduce(+, f_gauss[i] .* shape_fun.N[:, i]  .* gauss_data.weights[i] for i=1:gauss_data.size)
+    if isa(f_gauss, Number)
+        f_gauss = f_gauss .* ones(size(x))
+    end
+    if isa(k_gauss, Number)
+        k_gauss = k_gauss .* ones(size(x))
+    end
+
+    Klocal = reduce(+, B[:, i] .* k_gauss[i] .* transpose(B[:, i]) .* gauss_data.weights[i] for i=1:gauss_data.size)
+    Flocal = reduce(+, shape_fun.N[:, i] .* f_gauss[i] .* gauss_data.weights[i] for i=1:gauss_data.size)
 
     Klocal .*= jacobian
     Flocal .*= jacobian
@@ -37,7 +45,7 @@ function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunc
     end
 end
 
-function assemble(self::Condition, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Float64)
+function assemble(self::Condition, system::SystemOfEquations)
 
     if self.type == DIRICHLET
         push!(system.locked_dofs, self.node.id)
@@ -49,14 +57,14 @@ function assemble(self::Condition, system::SystemOfEquations, shape_fun::ShapeFu
 end
 
 
-function build(mesh::Mesh, shape_functions::ShapeFunctions, gauss_data::GaussData, diffusivity::Float64, source::Function)
+function build(mesh::Mesh, shape_functions::ShapeFunctions, gauss_data::GaussData, diffusivity::Function, source::Function)
     nnodes = size(mesh.nodes)[1]
     system = SystemOfEquations(nnodes)
     for e in mesh.elems
         assemble(e, system, shape_functions, gauss_data, diffusivity, source)
     end
     for c in mesh.conds
-        assemble(c, system, shape_functions, gauss_data, diffusivity)
+        assemble(c, system)
     end
     return system
 end
