@@ -5,7 +5,7 @@ mutable struct SystemOfEquations
     locked_dofs::Vector{Integer}
 end
 
-function SystemOfEquations(nnodes::Int)
+function SystemOfEquations(nnodes::Integer)
     return SystemOfEquations(zeros(Float64, nnodes, nnodes), zeros(Float64, nnodes), zeros(Float64, nnodes), [])
 end
 
