@@ -3,10 +3,12 @@
 # Solves equation
 #
 #       -2∇²u(x) = 3     x ∈ [0, 1]
+#           u(0) = 1
+#           u(1) = 1
 #
 # Which is known to be equal to
 #
-#     u(x) = 3/4 * x*(1 - x)
+#     u(x) = 1 + 3/4*x*(1 - x)
 #
 
 include("../src/math/gauss.jl")
@@ -19,8 +21,8 @@ using Test
 function solve_simple_laplacian(nelems::Integer, polynomial_order::Integer, n_gauss::Integer)::Vector{Float64}
     # Problem-specific settings
     length = 1.0                        # Size of the domain
-    left_bc = DIRICHLET, 0.0            # Left boundary condition
-    right_bc = DIRICHLET, 0.0           # Right boundary condition
+    left_bc = DIRICHLET, 1.0            # Left boundary condition
+    right_bc = DIRICHLET, 1.0           # Right boundary condition
     source(x) = 3                       # Source term f
     diffusivity(x) = 2                  # Diffusivity constant k
 
@@ -31,7 +33,7 @@ function solve_simple_laplacian(nelems::Integer, polynomial_order::Integer, n_ga
     return solve(system, mesh)
 end
 
-analytical(x::Float64)::Float64 = x*(1 - x)*3/4
+analytical(x::Float64)::Float64 = x*(1 - x)*3/4 + 1
 
 @testset "Validation: dirchlet_uniform_properties" begin
     # First order polynomials, 2 elements
