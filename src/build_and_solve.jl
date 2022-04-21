@@ -5,11 +5,11 @@ mutable struct SystemOfEquations
     locked_dofs::Vector{Integer}
 end
 
-function SystemOfEquations(nnodes::Integer)
+function SystemOfEquations(nnodes::Integer)::SystemOfEquations
     return SystemOfEquations(zeros(Float64, nnodes, nnodes), zeros(Float64, nnodes), zeros(Float64, nnodes), [])
 end
 
-function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Function, f::Function)
+function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Function, f::Function)::Nothing
     nnodes = size(self.nodes, 1)
     L = self.nodes[nnodes].x - self.nodes[1].x
     jacobian = L / 2
@@ -43,10 +43,10 @@ function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunc
         system.vec[n.id] += Flocal[i]
         i += 1
     end
+    return nothing
 end
 
-function assemble(self::Condition, system::SystemOfEquations)
-
+function assemble(self::Condition, system::SystemOfEquations)::Nothing
     if self.type == DIRICHLET
         push!(system.locked_dofs, self.node.id)
         system.sol[self.node.id] = self.value
@@ -54,10 +54,11 @@ function assemble(self::Condition, system::SystemOfEquations)
         Flocal = self.normal * self.value
         system.vec[self.node.id] += Flocal
     end
+    return nothing
 end
 
 
-function build(mesh::Mesh, shape_functions::ShapeFunctions, gauss_data::GaussData, diffusivity::Function, source::Function)
+function build(mesh::Mesh, shape_functions::ShapeFunctions, gauss_data::GaussData, diffusivity::Function, source::Function)::SystemOfEquations
     nnodes = size(mesh.nodes)[1]
     system = SystemOfEquations(nnodes)
     for e in mesh.elems
@@ -70,7 +71,7 @@ function build(mesh::Mesh, shape_functions::ShapeFunctions, gauss_data::GaussDat
 end
 
 
-function solve(self::SystemOfEquations)
+function solve(self::SystemOfEquations)::Vector{Float64}
     free_dofs = setdiff(1:size(self.mat)[1], self.locked_dofs)
     Aff = view(self.mat, free_dofs, free_dofs)
     Afl = view(self.mat, free_dofs, self.locked_dofs)
@@ -81,4 +82,6 @@ function solve(self::SystemOfEquations)
     rhs = bf - Afl * ul
 
     self.sol[free_dofs] = lhs \ rhs
+
+    return self.sol
 end

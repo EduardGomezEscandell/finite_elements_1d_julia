@@ -2,10 +2,11 @@ using Gaston
 
 function plot_at_nodes(mesh::Mesh, solution::Vector{Float64})
     # Plots the solution at the nodes
-    x = [node.x for node in mesh.nodes]
-    y = solution
-    display(
-        plot(x, y, w  = :lp, marker = "ecircle", legend = :Solution_at_nodes)
+    X = [node.x for node in mesh.nodes]
+    U = solution
+
+    return plot(X, U, w  = :l,
+        Axes(grid = :on, title = "'Solution'", xlabel = "'x'" , ylabel = "'u(x)'", key = :off),
     )
 end
 

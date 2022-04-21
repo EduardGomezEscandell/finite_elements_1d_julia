@@ -30,7 +30,7 @@ function generate_mesh(
         length::Float64,
         left_bc::Tuple{BoundaryTypes, Float64},
         right_bc::Tuple{BoundaryTypes, Float64}
-    )
+    )::Mesh
     nnodes = nelems*polynomial_order + 1
     nodes = [Node(i, (i-1)*length/(nnodes-1)) for i=1:nnodes]
     elems = [Element(el, nodes[(el-1)*polynomial_order+1:el*polynomial_order+1]) for el=1:nelems]

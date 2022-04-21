@@ -5,7 +5,9 @@
 #       -2∇²u(x) = 3     x ∈ [0, 1]
 #
 # Which is known to be equal to
+#
 #     u(x) = 3/4 * x*(1 - x)
+#
 
 include("../src/gauss.jl")
 include("../src/shape_fun.jl")
@@ -26,8 +28,7 @@ function solve_simple_laplacian(nelems::Integer, polynomial_order::Integer, n_ga
     gauss_data = get_gauss_quadrature(n_gauss)
     shape_functions = compute_shape_functions(polynomial_order, gauss_data)
     system = build(mesh, shape_functions, gauss_data, diffusivity, source)
-    solve(system)
-    return system.sol
+    return solve(system)
 end
 
 analytical(x::Float64)::Float64 = x*(1 - x)*3/4

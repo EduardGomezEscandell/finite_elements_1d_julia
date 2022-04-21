@@ -4,7 +4,7 @@ struct GaussData
     points::Vector{Float64}
 end
 
-function get_gauss_quadrature(npoints::Integer)
+function get_gauss_quadrature(npoints::Integer)::GaussData
     if npoints == 1
         return GaussData(1,
             [ 2.0000000000000000 ],
