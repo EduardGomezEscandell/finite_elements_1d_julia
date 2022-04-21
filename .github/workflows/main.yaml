@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  ci-ubuntu:
+    runs-on: ubuntu-latest
+    env:
+      BUILD_TYPE: Debug
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: julia-actions/setup-julia@v1
+        with:
+          julia_version: 1.4.1
+
+      - name: Test
+        run: julia test/dirchlet_uniform_properties.jl
