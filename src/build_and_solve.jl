@@ -1,12 +1,15 @@
+include("sparse.jl")
+
 mutable struct SystemOfEquations
-    mat::Matrix{Float64}
+    mat::DokMatrix
     vec::Vector{Float64}
     sol::Vector{Float64}
     locked_dofs::Vector{Integer}
+    size::Integer
 end
 
-function SystemOfEquations(nnodes::Integer)::SystemOfEquations
-    return SystemOfEquations(zeros(Float64, nnodes, nnodes), zeros(Float64, nnodes), zeros(Float64, nnodes), [])
+function SystemOfEquations(size::Integer)::SystemOfEquations
+    return SystemOfEquations(DokMatrix(size, size), zeros(Float64, size), zeros(Float64, size), [], size)
 end
 
 function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Function, f::Function)::Nothing
@@ -37,7 +40,7 @@ function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunc
     for n in self.nodes
         j = 1
         for m in self.nodes
-            system.mat[n.id, m.id] += Klocal[i, j]
+            add(system.mat, n.id, m.id, Klocal[i, j])
             j += 1
         end
         system.vec[n.id] += Flocal[i]
@@ -57,7 +60,6 @@ function assemble(self::Condition, system::SystemOfEquations)::Nothing
     return nothing
 end
 
-
 function build(mesh::Mesh, shape_functions::ShapeFunctions, gauss_data::GaussData, diffusivity::Function, source::Function)::SystemOfEquations
     nnodes = size(mesh.nodes)[1]
     system = SystemOfEquations(nnodes)
@@ -70,16 +72,16 @@ function build(mesh::Mesh, shape_functions::ShapeFunctions, gauss_data::GaussDat
     return system
 end
 
-
 function solve(self::SystemOfEquations)::Vector{Float64}
-    free_dofs = setdiff(1:size(self.mat)[1], self.locked_dofs)
-    Aff = view(self.mat, free_dofs, free_dofs)
-    Afl = view(self.mat, free_dofs, self.locked_dofs)
+    free_dofs = setdiff(1:self.size, self.locked_dofs)
+    A = to_csc(self.mat, self.size, self.size)
+    Aff = view(A, free_dofs, free_dofs)
+    Afl = view(A, free_dofs, self.locked_dofs)
     ul = view(self.sol, self.locked_dofs)
     bf = view(self.vec, free_dofs)
 
-    lhs = Aff
     rhs = bf - Afl * ul
+    lhs = SparseMatrixCSC(Aff) # Should not be a copy, but Julia can't do lu!(view, vector)
 
     self.sol[free_dofs] = lhs \ rhs
 
