@@ -1,27 +1,6 @@
-mutable struct Dof
-    id::Int64
-    free::Bool
-end
-mutable struct Node
-    id::Int64
-    x::Float64
-    dof::Dof
-end
-
-mutable struct Element
-    id::Int64
-    nodes::Vector{Node}
-end
-
-@enum BoundaryTypes DIRICHLET NEUMANN
-
-mutable struct Condition
-    id::Int64
-    node::Node
-    type::BoundaryTypes
-    value::Float64
-    normal::Float64
-end
+include("node.jl")
+include("element.jl")
+include("condition.jl")
 
 struct Mesh
     nodes::Vector{Node}
@@ -33,8 +12,8 @@ function generate_mesh(
         nelems::Integer,
         polynomial_order::Integer,
         length::Float64,
-        left_bc::Tuple{BoundaryTypes, Float64},
-        right_bc::Tuple{BoundaryTypes, Float64}
+        left_bc::Tuple{ConditionType, Float64},
+        right_bc::Tuple{ConditionType, Float64}
     )::Mesh
     nnodes = nelems*polynomial_order + 1
     nodes = [Node(i, (i-1)*length/(nnodes-1), Dof(0, true)) for i=1:nnodes]

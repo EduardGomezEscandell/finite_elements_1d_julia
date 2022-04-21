@@ -13,10 +13,10 @@ exec julia -i --compile=min "${BASH_SOURCE[0]}" "$@"
 # u is the unknown
 # They're all functions of x
 
-include("src/gauss.jl")
-include("src/shape_fun.jl")
-include("src/mesh.jl")
-include("src/build_and_solve.jl")
+include("src/math/gauss.jl")
+include("src/math/shape_fun.jl")
+include("src/mesh/mesh.jl")
+include("src/math/system_of_equations.jl")
 include("src/post_process.jl")
 
 function main()

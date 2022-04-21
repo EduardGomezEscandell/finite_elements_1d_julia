@@ -9,10 +9,10 @@
 #     u(x) = 3/4 * x*(1 - x)
 #
 
-include("../src/gauss.jl")
-include("../src/shape_fun.jl")
-include("../src/mesh.jl")
-include("../src/build_and_solve.jl")
+include("../src/math/gauss.jl")
+include("../src/math/shape_fun.jl")
+include("../src/mesh/mesh.jl")
+include("../src/math/system_of_equations.jl")
 
 using Test
 
