@@ -28,6 +28,6 @@ function Base.push!(self::DokMatrix, i::Int64, j::Int64, x::Float64)::Nothing
     return nothing
 end
 
-function to_csc(self::DokMatrix, nrows::Integer, ncols::Integer)::SparseMatrixCSC{Float64}
-    return sparse(self.I, self.J, self.X, nrows, ncols, +)
+function to_csc(self::DokMatrix)::SparseMatrixCSC{Float64}
+    return sparse(self.I, self.J, self.X, self.nrows, self.ncols, +)
 end

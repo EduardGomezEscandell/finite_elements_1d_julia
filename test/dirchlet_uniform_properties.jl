@@ -28,7 +28,7 @@ function solve_simple_laplacian(nelems::Integer, polynomial_order::Integer, n_ga
     gauss_data = get_gauss_quadrature(n_gauss)
     shape_functions = compute_shape_functions(polynomial_order, gauss_data)
     system = build(mesh, shape_functions, gauss_data, diffusivity, source)
-    return solve(system)
+    return solve(system, mesh)
 end
 
 analytical(x::Float64)::Float64 = x*(1 - x)*3/4

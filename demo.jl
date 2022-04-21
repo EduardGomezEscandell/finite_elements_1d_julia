@@ -51,7 +51,7 @@ function main()
     println("Assembly completed")
 
     # Solution
-    solve(system)
+    solve(system, mesh)
     println("Solving completed")
 
     # Output

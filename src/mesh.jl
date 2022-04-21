@@ -1,17 +1,22 @@
-struct Node
-    id::Integer
+mutable struct Dof
+    id::Int64
+    free::Bool
+end
+mutable struct Node
+    id::Int64
     x::Float64
+    dof::Dof
 end
 
-struct Element
-    id::Integer
+mutable struct Element
+    id::Int64
     nodes::Vector{Node}
 end
 
 @enum BoundaryTypes DIRICHLET NEUMANN
 
-struct Condition
-    id::Integer
+mutable struct Condition
+    id::Int64
     node::Node
     type::BoundaryTypes
     value::Float64
@@ -32,7 +37,7 @@ function generate_mesh(
         right_bc::Tuple{BoundaryTypes, Float64}
     )::Mesh
     nnodes = nelems*polynomial_order + 1
-    nodes = [Node(i, (i-1)*length/(nnodes-1)) for i=1:nnodes]
+    nodes = [Node(i, (i-1)*length/(nnodes-1), Dof(0, true)) for i=1:nnodes]
     elems = [Element(el, nodes[(el-1)*polynomial_order+1:el*polynomial_order+1]) for el=1:nelems]
     conds = [Condition(1, nodes[1],      left_bc[1],  left_bc[2], -1),
             Condition(2, nodes[nnodes], right_bc[1], right_bc[2], 1)]
