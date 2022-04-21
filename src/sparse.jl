@@ -18,7 +18,7 @@ function DokMatrix(nrows::Integer, ncols::Integer)::DokMatrix
     )
 end
 
-function add(self::DokMatrix, i::Int64, j::Int64, x::Float64)::Nothing
+function Base.push!(self::DokMatrix, i::Int64, j::Int64, x::Float64)::Nothing
     if(i < 1 || i > self.nrows || j < 1 || j > self.ncols)
         error("Index out of bounds")
     end

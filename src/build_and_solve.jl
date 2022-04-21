@@ -40,7 +40,7 @@ function assemble(self::Element, system::SystemOfEquations, shape_fun::ShapeFunc
     for n in self.nodes
         j = 1
         for m in self.nodes
-            add(system.mat, n.id, m.id, Klocal[i, j])
+            push!(system.mat, n.id, m.id, Klocal[i, j])
             j += 1
         end
         system.vec[n.id] += Flocal[i]
