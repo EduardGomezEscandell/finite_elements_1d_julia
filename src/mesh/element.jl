@@ -23,11 +23,8 @@ function local_system(self::Element, shape_fun::ShapeFunctions, gauss_data::Gaus
         k_gauss = k_gauss .* ones(size(x))
     end
 
-    Klocal = reduce(+, B[:, i] .* k_gauss[i] .* transpose(B[:, i]) .* gauss_data.weights[i] for i=1:gauss_data.size)
-    Flocal = reduce(+, shape_fun.N[:, i] .* f_gauss[i] .* gauss_data.weights[i] for i=1:gauss_data.size)
-
-    Klocal .*= jacobian
-    Flocal .*= jacobian
+    Klocal = jacobian * reduce(+, B[:, i] .* k_gauss[i] .* transpose(B[:, i]) .* gauss_data.weights[i] for i=1:gauss_data.size)
+    Flocal = jacobian * reduce(+, shape_fun.N[:, i] .* f_gauss[i] .* gauss_data.weights[i] for i=1:gauss_data.size)
 
     return (Klocal, Flocal, zeros(Float64,0))
 end

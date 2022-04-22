@@ -10,7 +10,7 @@ function plot_at_nodes(mesh::Mesh, solution::Vector{Float64})
     )
 end
 
-function plot_solution(mesh::Mesh, solution::Vector{Float64}, shape_fun::ShapeFunctions, gauss_data::GaussData)
+function plot_solution(mesh::Mesh, solution::Vector{Float64}, shape_fun::ShapeFunctions, gauss_data::GaussData; axes_kwargs...)
     # Plots the solution at the nodes and gauss points
     X = []
     U = []
@@ -40,6 +40,6 @@ function plot_solution(mesh::Mesh, solution::Vector{Float64}, shape_fun::ShapeFu
     end
 
     return plot(X, U, w  = :l,
-        Axes(grid = :on, title = "'Solution'", xlabel = "'x'" , ylabel = "'u(x)'", key = :off),
+        Axes(grid = :on, xlabel = "'x'" , ylabel = "'u(x)'", key = :off; axes_kwargs...),
     )
 end

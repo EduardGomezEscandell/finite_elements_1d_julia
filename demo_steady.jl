@@ -57,7 +57,7 @@ function main()
     # Output
     plotting_gauss = get_gauss_quadrature(n_gauss_plotting)
     plotting_shape_fun = compute_shape_functions(polynomial_order, plotting_gauss)
-    p = plot_solution(mesh, system.sol, plotting_shape_fun, plotting_gauss)
+    p = plot_solution(mesh, system.sol, plotting_shape_fun, plotting_gauss; title = "'Solution'")
 
     return (mesh, system.sol, p)
 end
