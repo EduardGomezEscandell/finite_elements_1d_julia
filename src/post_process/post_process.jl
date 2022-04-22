@@ -1,20 +1,23 @@
 using Gaston
 
-function plot_at_nodes(mesh::Mesh, solution::Vector{Float64})
-    # Plots the solution at the nodes
-    X = [node.x for node in mesh.nodes]
-    U = solution
-
-    return plot(X, U, w  = :l,
-        Axes(grid = :on, title = "'Solution'", xlabel = "'x'" , ylabel = "'u(x)'", key = :off),
-    )
+mutable struct Plotter
+    mesh::Mesh
+    shape_fun::ShapeFunctions
+    gauss_data::GaussData
 end
 
-function plot_solution(mesh::Mesh, solution::Vector{Float64}, shape_fun::ShapeFunctions, gauss_data::GaussData; axes_kwargs...)
+function Plotter(mesh::Mesh, n_gauss::Integer)
+    shape_funs = ShapeFunctions(mesh.shape_functions)
+    gauss_data = get_gauss_quadrature(n_gauss)
+    cache(shape_funs, gauss_data)
+    return Plotter(mesh, shape_funs, gauss_data)
+end
+
+function plot_step(self::Plotter, solution::Vector{Float64}; axes_kwargs...)
     # Plots the solution at the nodes and gauss points
     X = []
     U = []
-    for e in mesh.elems
+    for e in self.mesh.elems
         datapoints::Array{Tuple{Float64, Float64}} = [] # {x, u}
 
         nnodes = size(e.nodes, 1)
@@ -23,7 +26,7 @@ function plot_solution(mesh::Mesh, solution::Vector{Float64}, shape_fun::ShapeFu
         u_at_nodes = transpose([solution[n.id] for n in e.nodes])
 
         # Adding gauss points values
-        for (ξ, N) in zip(gauss_data.points, eachcol(shape_fun.N))
+        for (ξ, N) in zip(self.gauss_data.points, eachcol(self.shape_fun.N))
             x = x0 + jacobian*ξ
             u = u_at_nodes * N
             push!(datapoints, (x, u))

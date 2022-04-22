@@ -7,8 +7,8 @@ mutable struct DirichletCondition <: Condition
     normal::Float64
 end
 
-function local_system(self::DirichletCondition; kwargs...)::Tuple{Matrix{Float64}, Vector{Float64}, Vector{Float64}}
-    return (zeros(Float64, 0, 0), zeros(Float64,0), [self.value])
+function local_system(self::DirichletCondition; kwargs...)::Tuple{Matrix{Float64}, Vector{Float64}}
+    return (zeros(Float64, 1, 1), [self.value])
 end
 
 function lock_dofs(self::DirichletCondition)::Nothing

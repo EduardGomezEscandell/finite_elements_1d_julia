@@ -17,15 +17,15 @@
 # ensure the initial condition is consistent with the boundary conditions,
 # otherwise the solution will oscilate.
 
-
-include("../src/all.jl")
+include("../src/integrators/time_integrator_theta_method.jl")
+include("../src/post_process/post_process.jl")
 
 function demo_unsteady_main()
-    println("Starting Finite Element program")
+    @info "Starting Finite Element program"
 
     ## Settings
     # Time settings
-    t_start = 0.0                       # Start time
+    θ = 0.0                             # Time integration point: θ ∈ [0, 1]
     t_end   = 10.0                      # Start time
     n_steps = 100                       # Number of time steps
 
@@ -49,38 +49,25 @@ function demo_unsteady_main()
     u0(x) = sin.(9.5*pi*x)              # Initial condition
 
     ## Meshing
-    mesh = generate_mesh(length, ("UnsteadyLaplacian", polynomial_order, nelems), left_bc, right_bc)
-    println("Meshing completed")
+    mesh = generate_mesh(length, ("Laplacian", polynomial_order, nelems), left_bc, right_bc)
+    @info "Meshing completed"
 
-    ## Precomputing data
-    gauss_data = get_gauss_quadrature(n_gauss_numerical)
-    shape_functions = compute_shape_functions(polynomial_order, gauss_data)
-    builder_and_solver = BuilderAndSolver(mesh)
-    Δt = (t_end - t_start) / n_steps
-    u = u0([node.x for node in mesh.nodes]) .* ones(size(mesh.nodes))
-    println("Preliminaries completed")
+    # Chosing tools
+    space_integrator = SpaceIntegrator(mesh, n_gauss_numerical)
+    time_integrator = TimeIntegratorThetaMethod(space_integrator, t_end, n_steps, θ)
+    plotter = Plotter(mesh, n_gauss_plotting)
 
-    for (step, time) in enumerate(LinRange(t_start, t_end, n_steps))
-        wallclock_start = time_ns()/1e9
-
-        formatted_time = string(floor(1000 * time) / 1000)
-        println("STEP $(step)  t = $(formatted_time)s  Δt = $(Δt)s")
-
-        # Assembly
-        build(builder_and_solver, shape_functions, gauss_data; μ=μ, s=s, t=time, Δt=Δt, u_old=u)
-
-        # Solution
-        u = solve(builder_and_solver)
-
-        # Output
-        plotting_gauss = get_gauss_quadrature(n_gauss_plotting)
-        plotting_shape_fun = compute_shape_functions(polynomial_order, plotting_gauss)
-        p = plot_solution(mesh, u, plotting_shape_fun, plotting_gauss; title = "'Solution at t=$(formatted_time)s'", yrange=(-1.1, 1.1))
-
-        wallclock_time_elapsed = time_ns()/1e9 - wallclock_start
-        sleep(max(wallclock_wait_time - wallclock_time_elapsed, 0))
-        display(p)
+    end_of_step_hook = (u; kwargs...) -> begin
+        step = kwargs[:step]
+        time = kwargs[:time]
+        @info "TimeIntegratorThetaMethod: Solved step $(step) t=$(time)"
+        display(plot_step(plotter, u; title = "'Solution at t=$(floor(1000*time)/1000)s'"))#, yrange=(-1.1, 1.1)))
+        sleep(wallclock_wait_time)
     end
+
+    # Solving
+    integrate(time_integrator, end_of_step_hook; s=s, μ=μ, u0=u0)
+    @info "Solved"
 
     return nothing
 end

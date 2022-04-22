@@ -23,6 +23,6 @@ function lock_dofs(self::Condition)::Nothing
     error("Calling abstract base class lock_dofs")
 end
 
-function local_system(self::Condition; kwargs...)::Tuple{Matrix{Float64}, Vector{Float64}, Vector{Float64}}
+function local_system(self::Condition; kwargs...)::Tuple{Matrix{Float64}, Vector{Float64}}
     error("Calling abstract base class local_system")
 end

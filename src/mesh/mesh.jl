@@ -2,17 +2,18 @@ include("node.jl")
 include("../elements/factory.jl")
 include("../conditions/factory.jl")
 
-struct Mesh
+mutable struct Mesh
     nodes::Vector{Node}
     elems::Vector{Element}
     conds::Vector{Condition}
+    shape_functions::ShapeFunctions
 end
 
 function generate_mesh(
         length::Float64,
         element::Tuple{String, Integer, Integer},
         left_bc::Tuple{String, Float64},
-        right_bc::Tuple{String, Float64}
+        right_bc::Tuple{String, Float64},
     )::Mesh
     element_name, polynomial_order, nelems = element
     left_bc_name, left_bc_value = left_bc
@@ -23,7 +24,7 @@ function generate_mesh(
     elems = [ElementFactory(element_name, el, nodes[(el-1)*polynomial_order+1:el*polynomial_order+1]) for el=1:nelems]
     conds = [ConditionFactory(left_bc_name,  1, nodes[1],       left_bc_value, -1.0),
              ConditionFactory(right_bc_name, 2, nodes[nnodes], right_bc_value,  1.0)]
-    return Mesh(nodes, elems, conds)
+    return Mesh(nodes, elems, conds, ShapeFunctions(polynomial_order))
 end
 
 function setup_dofs(self::Mesh)::Tuple{Int64, Int64}

@@ -11,7 +11,7 @@
 #     u(x) = 1 + 3/4*x*(1 - x)
 #
 
-include("../src/builder_and_solver/builder_and_solver.jl")
+include("../src/integrators/time_integrator_steady.jl")
 
 using Test
 
@@ -21,15 +21,15 @@ function solve_simple_laplacian(nelems::Integer, polynomial_order::Integer, n_ga
     elements = ("Laplacian", polynomial_order, nelems)
     left_bc  = ("Dirichlet", 1.0)       # Left boundary condition
     right_bc = ("Dirichlet", 1.0)       # Right boundary condition
-    s(x) = 3                            # Source term
-    μ(x) = 2                            # Diffusivity constant
+    s(t, x) = 3                         # Source term
+    μ(t, x) = 2                         # Diffusivity constant
 
     mesh = generate_mesh(length, elements, left_bc, right_bc)
-    gauss_data = get_gauss_quadrature(n_gauss)
-    shape_functions = compute_shape_functions(polynomial_order, gauss_data)
-    builder_and_solver = BuilderAndSolver(mesh)
-    build(builder_and_solver, shape_functions, gauss_data; μ=μ, s=s)
-    return solve(builder_and_solver)
+
+    space_integrator = SpaceIntegrator(mesh, n_gauss)
+    time_integrator = TimeIntegratorSteady(space_integrator)
+
+    return integrate(time_integrator; s=s, μ=μ)
 end
 
 analytical(x::Float64)::Float64 = x*(1 - x)*3/4 + 1

@@ -9,15 +9,15 @@
 # u is the unknown
 # They're all functions of x
 
-include("../src/all.jl")
+include("../src/integrators/time_integrator_quasistatic.jl")
+include("../src/post_process/post_process.jl")
 
-function demo_quasi_static_main()
-    println("Starting Finite Element program")
+function demo_quasi_static_main()::Nothing
+    @info "Starting Finite Element program"
 
     ## Settings
     # Time settings
-    t_start = 0.0                       # Start time
-    t_end = 10.0                        # Start time
+    t_end = 10.0                        # End time
     n_steps = 100                       # Number of time steps
 
     # Space settings
@@ -35,46 +35,30 @@ function demo_quasi_static_main()
     right_bc = "Dirichlet", 0.0         # Right boundary condition
 
     # Physical settings
-    source(t, x) = - 100 * cos.(3*pi*x) * sin(t)    # Source term f
-    diffusivity(t, x) = 1                           # Diffusivity constant μ
+    s(t, x) = - 100 * cos.(3*pi*x) * sin(t)    # Source term
+    μ(t, x) = 1                                # Diffusivity constant
 
     ## Meshing
     mesh = generate_mesh(length, ("Laplacian", polynomial_order, nelems), left_bc, right_bc)
-    println("Meshing completed")
+    @info "Meshing completed"
 
-    ## Precomputing data
-    gauss_data = get_gauss_quadrature(n_gauss_numerical)
-    shape_functions = compute_shape_functions(polynomial_order, gauss_data)
-    builder_and_solver = BuilderAndSolver(mesh)
-    println("Preliminaries completed")
+    # Chosing tools
+    space_integrator = SpaceIntegrator(mesh, n_gauss_numerical)
+    time_integrator = TimeIntegratorQuasiStatic(space_integrator, t_end, n_steps)
+    plotter = Plotter(mesh, n_gauss_plotting)
 
-    # Time-dependent stuff
-    curry(f, x) = (xs...) -> f(x, xs...)
-
-    for (step, time) in enumerate(LinRange(t_start, t_end, n_steps))
-        wallclock_start = time_ns()/1e9
-
-        formatted_time = string(floor(1000 * time) / 1000)
-        println("STEP $(step)  t = $(formatted_time)s")
-
-        μ = curry(diffusivity, time)
-        s = curry(source, time)
-
-        # Assembly
-        build(builder_and_solver, shape_functions, gauss_data, μ=μ, s=s)
-
-        # Solution
-        u = solve(builder_and_solver)
-
-        # Output
-        plotting_gauss = get_gauss_quadrature(n_gauss_plotting)
-        plotting_shape_fun = compute_shape_functions(polynomial_order, plotting_gauss)
-        p = plot_solution(mesh, u, plotting_shape_fun, plotting_gauss; title = "'Solution at t=$(formatted_time)s'",yrange=(-2, 2))
-
-        wallclock_time_elapsed = time_ns()/1e9 - wallclock_start
-        sleep(max(wallclock_wait_time - wallclock_time_elapsed, 0))
-        display(p)
+    end_of_step_hook = (u; kwargs...) -> begin
+        step = kwargs[:step]
+        time = kwargs[:time]
+        @info "TimeIntegratorQuasiStatic: Solved step $(step) t=$(time)"
+        display(plot_step(plotter, u; title =  "'Solution at t=$(time)s'",yrange=(-2, 2)))
+        sleep(wallclock_wait_time)
     end
+
+    # Solving
+    integrate(time_integrator, end_of_step_hook; s=s, μ=μ)
+
+    @info "Solved"
 
     return nothing
 end

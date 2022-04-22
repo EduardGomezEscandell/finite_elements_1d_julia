@@ -9,10 +9,11 @@
 # u is the unknown
 # They're all functions of x
 
-include("../src/all.jl")
+include("../src/integrators/time_integrator_steady.jl")
+include("../src/post_process/post_process.jl")
 
-function demo_steady_main()
-    println("Starting Finite Element program")
+function demo_steady_main()::Nothing
+    @info "Starting Finite Element program"
     ## Settings
     # Numerical settings
     nelems = 10                         # Number of elements
@@ -26,33 +27,26 @@ function demo_steady_main()
     right_bc = "Dirichlet", -2.0        # Right boundary condition
 
     # Physical settings
-    s(x) = - 100 * cos.(3*pi*x)         # Source term
-    μ(x) = 1                            # Diffusivity term
+    s(t, x) = - 100 * cos.(3*pi*x)      # Source term
+    μ(t, x) = 1                         # Diffusivity term
 
     ## Meshing
     mesh = generate_mesh(length, ("Laplacian", polynomial_order, nelems), left_bc, right_bc)
-    println("Meshing completed")
+    @info "Meshing completed"
 
-    # Precomputing data
-    gauss_data = get_gauss_quadrature(n_gauss_numerical)
-    shape_functions = compute_shape_functions(polynomial_order, gauss_data)
-    bns = BuilderAndSolver(mesh)
-    println("Preliminaries completed")
+    # Chosing tools
+    space_integrator = SpaceIntegrator(mesh, n_gauss_numerical)
+    time_integrator = TimeIntegratorSteady(space_integrator)
+    plotter = Plotter(mesh, n_gauss_plotting)
 
-    # Assembly
-    build(bns, shape_functions, gauss_data, μ=μ, s=s)
-    println("Assembly completed")
+    end_of_step_hook = (u; kwargs...) -> display(plot_step(plotter, u; title = "'Solution'"))
 
-    # Solution
-    u = solve(bns)
-    println("Solving completed")
+    # Solving
+    u = integrate(time_integrator, end_of_step_hook; s=s, μ=μ)
+    @info "Solved"
 
-    # Output
-    plotting_gauss = get_gauss_quadrature(n_gauss_plotting)
-    plotting_shape_fun = compute_shape_functions(polynomial_order, plotting_gauss)
-    p = plot_solution(mesh, u, plotting_shape_fun, plotting_gauss; title = "'Solution'")
+    return nothing
 
-    display(p)
 end
 
 demo_steady_main()
