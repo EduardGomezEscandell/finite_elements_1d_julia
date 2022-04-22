@@ -1,21 +1,17 @@
-#!/bin/bash
-#=
-exec julia -i --compile=min "${BASH_SOURCE[0]}" "$@"
-=#
 # Finite element program
 #-----------------------
 # Solves 1D equations of type
 #
-#       -∇·μ∇u = f
+#       -∇·μ∇u = s
 #
 # μ is the diffusivity
-# f is the source term
+# s is the source term
 # u is the unknown
 # They're all functions of x
 
 include("src/all.jl")
 
-function main()
+function demo_quasi_static_main()
     println("Starting Finite Element program")
 
     ## Settings
@@ -32,7 +28,7 @@ function main()
 
     # Plotting settings
     n_gauss_plotting = 7                # Gauss interpolation for plotting solution
-    wallclock_wait_time = 0.1           # Time between frames
+    wallclock_wait_time = 1/30          # Time between frames
 
     # Domain settings
     left_bc  = "Dirichlet", 0.0         # Left boundary condition
@@ -84,4 +80,4 @@ function main()
 end
 
 
-main()
+demo_quasi_static_main()

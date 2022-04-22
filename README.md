@@ -15,16 +15,11 @@ Open the demo file and edit the settings to your liking. Then use:
 ```bash
 julia -i demo_steady.jl
 ```
-or
-```bash
-bash demo_steady.jl
-```
 The following figure should pop up:
 
 ![image](https://user-images.githubusercontent.com/47142856/164203009-7d13d0b8-6a17-40e2-b03d-a21111d446b0.png)
 
-
-After either of these, a julia interactive session will stay open, and you can subsequently call
+A julia interactive session will stay open, and you can subsequently call
 ```julia
 julia> include("demo_steady.jl")
 ```

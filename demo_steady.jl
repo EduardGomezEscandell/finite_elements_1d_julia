@@ -1,21 +1,17 @@
-#!/bin/bash
-#=
-exec julia -i --compile=min "${BASH_SOURCE[0]}" "$@"
-=#
 # Finite element program
 #-----------------------
 # Solves 1D equations of type
 #
-#       -∇·k∇u = f
+#       -∇·μ∇u = s
 #
-# k is the diffusivity
-# f is the source term
+# μ is the diffusivity
+# s is the source term
 # u is the unknown
 # They're all functions of x
 
 include("src/all.jl")
 
-function main()
+function demo_steady_main()
     println("Starting Finite Element program")
     ## Settings
     # Numerical settings
@@ -26,12 +22,12 @@ function main()
 
     # Domain settings
     length = 1.0                        # Size of the domain
-    left_bc = "Neumann", -1.0             # Left boundary condition
-    right_bc = "Dirichlet", -2.0          # Right boundary condition
+    left_bc = "Neumann", -1.0           # Left boundary condition
+    right_bc = "Dirichlet", -2.0        # Right boundary condition
 
     # Physical settings
-    source(x) = - 100 * cos.(3*pi*x)    # Source term f
-    diffusivity(x) = 1                  # Diffusivity constant k
+    s(x) = - 100 * cos.(3*pi*x)         # Source term
+    μ(x) = 1                            # Diffusivity term
 
     ## Meshing
     mesh = generate_mesh(length, ("Laplacian", polynomial_order, nelems), left_bc, right_bc)
@@ -45,7 +41,7 @@ function main()
 
 
     # Assembly
-    build(bns, shape_functions, gauss_data, diffusivity, source)
+    build(bns, shape_functions, gauss_data, μ, s)
     println("Assembly completed")
 
     # Solution
@@ -57,8 +53,7 @@ function main()
     plotting_shape_fun = compute_shape_functions(polynomial_order, plotting_gauss)
     p = plot_solution(mesh, u, plotting_shape_fun, plotting_gauss; title = "'Solution'")
 
-    return (mesh, u, p)
+    display(p)
 end
 
-(mesh, solution, p) = main()
-display(p)
+demo_steady_main()
