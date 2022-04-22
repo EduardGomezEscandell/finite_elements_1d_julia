@@ -13,11 +13,7 @@ exec julia -i --compile=min "${BASH_SOURCE[0]}" "$@"
 # u is the unknown
 # They're all functions of x
 
-include("src/math/gauss.jl")
-include("src/math/shape_fun.jl")
-include("src/mesh/mesh.jl")
-include("src/math/system_of_equations.jl")
-include("src/post_process.jl")
+include("src/all.jl")
 
 function main()
     println("Starting Finite Element program")
@@ -30,36 +26,38 @@ function main()
 
     # Domain settings
     length = 1.0                        # Size of the domain
-    left_bc = NEUMANN, -1.0             # Left boundary condition
-    right_bc = DIRICHLET, -2.0          # Right boundary condition
+    left_bc = "Neumann", -1.0             # Left boundary condition
+    right_bc = "Dirichlet", -2.0          # Right boundary condition
 
     # Physical settings
     source(x) = - 100 * cos.(3*pi*x)    # Source term f
     diffusivity(x) = 1                  # Diffusivity constant k
 
     ## Meshing
-    mesh = generate_mesh(nelems, polynomial_order, length, left_bc, right_bc)
+    mesh = generate_mesh(length, ("Laplacian", polynomial_order, nelems), left_bc, right_bc)
     println("Meshing completed")
 
     # Precomputing data
     gauss_data = get_gauss_quadrature(n_gauss_numerical)
     shape_functions = compute_shape_functions(polynomial_order, gauss_data)
+    bns = BuilderAndSolver(mesh)
     println("Preliminaries completed")
 
+
     # Assembly
-    system = build(mesh, shape_functions, gauss_data, diffusivity, source)
+    build(bns, shape_functions, gauss_data, diffusivity, source)
     println("Assembly completed")
 
     # Solution
-    solve(system, mesh)
+    u = solve(bns)
     println("Solving completed")
 
     # Output
     plotting_gauss = get_gauss_quadrature(n_gauss_plotting)
     plotting_shape_fun = compute_shape_functions(polynomial_order, plotting_gauss)
-    p = plot_solution(mesh, system.sol, plotting_shape_fun, plotting_gauss; title = "'Solution'")
+    p = plot_solution(mesh, u, plotting_shape_fun, plotting_gauss; title = "'Solution'")
 
-    return (mesh, system.sol, p)
+    return (mesh, u, p)
 end
 
 (mesh, solution, p) = main()

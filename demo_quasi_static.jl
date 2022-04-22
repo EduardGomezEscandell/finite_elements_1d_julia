@@ -13,11 +13,7 @@ exec julia -i --compile=min "${BASH_SOURCE[0]}" "$@"
 # u is the unknown
 # They're all functions of x
 
-include("src/math/gauss.jl")
-include("src/math/shape_fun.jl")
-include("src/mesh/mesh.jl")
-include("src/math/system_of_equations.jl")
-include("src/post_process.jl")
+include("src/all.jl")
 
 function main()
     println("Starting Finite Element program")
@@ -39,26 +35,26 @@ function main()
     wallclock_wait_time = 0.1           # Time between frames
 
     # Domain settings
-    left_bc = DIRICHLET, 0.0            # Left boundary condition
-    right_bc = DIRICHLET, 0.0           # Right boundary condition
+    left_bc  = "Dirichlet", 0.0         # Left boundary condition
+    right_bc = "Dirichlet", 0.0         # Right boundary condition
 
     # Physical settings
     source(t, x) = - 100 * cos.(3*pi*x) * sin(t)    # Source term f
     diffusivity(t, x) = 1                           # Diffusivity constant μ
 
     ## Meshing
-    mesh = generate_mesh(nelems, polynomial_order, length, left_bc, right_bc)
+    mesh = generate_mesh(length, ("Laplacian", polynomial_order, nelems), left_bc, right_bc)
     println("Meshing completed")
 
     ## Precomputing data
     gauss_data = get_gauss_quadrature(n_gauss_numerical)
     shape_functions = compute_shape_functions(polynomial_order, gauss_data)
+    builder_and_solver = BuilderAndSolver(mesh)
     println("Preliminaries completed")
 
     # Time-dependent stuff
     curry(f, x) = (xs...) -> f(x, xs...)
 
-    # Assembly
     for (step, time) in enumerate(LinRange(t_start, t_end, n_steps))
         wallclock_start = time_ns()/1e9
 
@@ -68,15 +64,16 @@ function main()
         μ = curry(diffusivity, time)
         s = curry(source, time)
 
-        system = build(mesh, shape_functions, gauss_data, μ, s)
+        # Assembly
+        build(builder_and_solver, shape_functions, gauss_data, μ, s)
 
         # Solution
-        solve(system, mesh)
+        u = solve(builder_and_solver)
 
         # Output
         plotting_gauss = get_gauss_quadrature(n_gauss_plotting)
         plotting_shape_fun = compute_shape_functions(polynomial_order, plotting_gauss)
-        p = plot_solution(mesh, system.sol, plotting_shape_fun, plotting_gauss; title = "'Solution at t=$(formatted_time)s'",yrange=(-2, 2))
+        p = plot_solution(mesh, u, plotting_shape_fun, plotting_gauss; title = "'Solution at t=$(formatted_time)s'",yrange=(-2, 2))
 
         wallclock_time_elapsed = time_ns()/1e9 - wallclock_start
         sleep(max(wallclock_wait_time - wallclock_time_elapsed, 0))

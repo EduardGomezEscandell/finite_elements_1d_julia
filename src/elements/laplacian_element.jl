@@ -1,11 +1,11 @@
-include("node.jl")
+include("element.jl")
 
-mutable struct Element
+mutable struct LaplacianElement <: Element
     id::Int64
     nodes::Vector{Node}
 end
 
-function local_system(self::Element, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Function, f::Function)::Tuple{Matrix{Float64}, Vector{Float64}, Vector{Float64}}
+function local_system(self::LaplacianElement, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Function, f::Function)::Tuple{Matrix{Float64}, Vector{Float64}, Vector{Float64}}
     nnodes = size(self.nodes, 1)
     L = self.nodes[nnodes].x - self.nodes[1].x
     jacobian = L / 2

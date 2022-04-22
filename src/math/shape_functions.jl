@@ -1,3 +1,5 @@
+include("gauss_data.jl")
+
 struct ShapeFunctions
     N::Matrix{Float64}
     B::Matrix{Float64}

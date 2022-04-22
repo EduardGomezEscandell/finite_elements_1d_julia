@@ -11,26 +11,25 @@
 #     u(x) = 1 + 3/4*x*(1 - x)
 #
 
-include("../src/math/gauss.jl")
-include("../src/math/shape_fun.jl")
-include("../src/mesh/mesh.jl")
-include("../src/math/system_of_equations.jl")
+include("../src/builder_and_solver/builder_and_solver.jl")
 
 using Test
 
 function solve_simple_laplacian(nelems::Integer, polynomial_order::Integer, n_gauss::Integer)::Vector{Float64}
     # Problem-specific settings
     length = 1.0                        # Size of the domain
-    left_bc = DIRICHLET, 1.0            # Left boundary condition
-    right_bc = DIRICHLET, 1.0           # Right boundary condition
+    elements = ("Laplacian", polynomial_order, nelems)
+    left_bc  = ("Dirichlet", 1.0)       # Left boundary condition
+    right_bc = ("Dirichlet", 1.0)       # Right boundary condition
     source(x) = 3                       # Source term f
     diffusivity(x) = 2                  # Diffusivity constant k
 
-    mesh = generate_mesh(nelems, polynomial_order, length, left_bc, right_bc)
+    mesh = generate_mesh(length, elements, left_bc, right_bc)
     gauss_data = get_gauss_quadrature(n_gauss)
     shape_functions = compute_shape_functions(polynomial_order, gauss_data)
-    system = build(mesh, shape_functions, gauss_data, diffusivity, source)
-    return solve(system, mesh)
+    builder_and_solver = BuilderAndSolver(mesh)
+    build(builder_and_solver, shape_functions, gauss_data, diffusivity, source)
+    return solve(builder_and_solver)
 end
 
 analytical(x::Float64)::Float64 = x*(1 - x)*3/4 + 1
