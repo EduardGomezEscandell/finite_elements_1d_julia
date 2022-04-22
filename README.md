@@ -11,16 +11,19 @@ sudo apt install gnuplot
 You can also use `bash install_dependencies.sh` and this will be done automatically for you.
 
 ## How to run
-Open the demo file and edit the settings to your liking. Then use:
+Open the `demos/demo_steady.jl` file and edit the settings to your liking. Then use:
 ```bash
-julia -i demo_steady.jl
+julia -i demos/demo_steady.jl
 ```
 The following figure should pop up:
 
 ![image](https://user-images.githubusercontent.com/47142856/164203009-7d13d0b8-6a17-40e2-b03d-a21111d446b0.png)
 
-A julia interactive session will stay open, and you can subsequently call
+If no figure pops up, you may be missing `gnuplot` (a warning will show in the console) or you might have run the
+program without the `-i` flag. A julia interactive session will stay open, and you can subsequently call
 ```julia
-julia> include("demo_steady.jl")
+julia> include("demos/demo_steady.jl")
 ```
 after changing any of the settings to avoid recompiling Gaston, the plotting library.
+
+The same process works for the other demos.

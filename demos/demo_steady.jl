@@ -9,7 +9,7 @@
 # u is the unknown
 # They're all functions of x
 
-include("src/all.jl")
+include("../src/all.jl")
 
 function demo_steady_main()
     println("Starting Finite Element program")
