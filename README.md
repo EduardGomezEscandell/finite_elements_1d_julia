@@ -8,7 +8,6 @@ You need to install the `Gaston` package and `GNUplot`:
 julia -e 'using Pkg; Pkg.add("Gaston")'
 sudo apt install gnuplot
 ```
-You can also use `bash install_dependencies.sh` and this will be done automatically for you.
 
 ## How to run
 Open the `demos/demo_steady.jl` file and edit the settings to your liking. Then use:
