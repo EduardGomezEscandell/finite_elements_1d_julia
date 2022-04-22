@@ -25,4 +25,6 @@ julia> include("demos/demo_steady.jl")
 ```
 after changing any of the settings to avoid recompiling Gaston, the plotting library.
 
-The same process works for the other demos.
+The same process works for the other demos. For instance, here is the result for `demos/demo_unsteady.jl`).
+
+![Webp net-gifmaker](https://user-images.githubusercontent.com/47142856/164744229-e9387896-5b54-42c4-b86e-17ea35298d0c.gif)
