@@ -1,6 +1,14 @@
 # Finite element implementation in Julia
 This is a toy project as a first contact with the Julia programming language.
 
+It solves partial derivative equations in a 1D domain using the Finite Element Method.
+Currently, only the Poisson equation is implemented, both its time-dependent and steady
+state versions, but the program is easily extendable to other partial derivative equations.
+
+You can choose between diferent polynomial interpolations and diferent quadrature orders.
+You can also chose between Neumann and Dirichlet boundary conditions.
+
+
 ### Dependencies
 You need to install the `Gaston` package and `GNUplot`:
 
