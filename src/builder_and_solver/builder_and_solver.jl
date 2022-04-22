@@ -40,17 +40,17 @@ function local_assembly(self::BuilderAndSolver, nodes::Vector{Node}, K::Matrix{F
 end
 
 
-function build(self::BuilderAndSolver, shape_functions::ShapeFunctions, gauss_data::GaussData, diffusivity::Function, source::Function)::Nothing
+function build(self::BuilderAndSolver, shape_functions::ShapeFunctions, gauss_data::GaussData; kwargs...)::Nothing
     (free_counter, lock_counter) = setup_dofs(self.mesh)
     self.system = SystemOfEquations(free_counter, lock_counter)
 
     for e in self.mesh.elems
-        (K, F, U) = local_system(e, self.system, shape_functions, gauss_data, diffusivity, source)
+        (K, F, U) = local_system(e, self.system, shape_functions, gauss_data; kwargs...)
         local_assembly(self, e.nodes, K, F, U)
     end
 
     for c in self.mesh.conds
-        (K, F, U) = local_system(c)
+        (K, F, U) = local_system(c; kwargs...)
         local_assembly(self, [c.node], K, F, U)
     end
     return nothing

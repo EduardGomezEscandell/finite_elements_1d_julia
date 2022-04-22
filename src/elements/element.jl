@@ -16,9 +16,9 @@ Interface
 ---------
 =#
 function Element(id::Int64, node::Vector{Node})
-    error("Calling base class constructor")
+    error("Calling abstract base class constructor")
 end
 
-function local_system(self::Element, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData, k::Function, f::Function)::Tuple{Matrix{Float64}, Vector{Float64}, Vector{Float64}}
-    error("Calling base class local_system")
+function local_system(self::Element, system::SystemOfEquations, shape_fun::ShapeFunctions, gauss_data::GaussData; kwargs...)::Tuple{Matrix{Float64}, Vector{Float64}, Vector{Float64}}
+    error("Calling abstract base class local_system")
 end

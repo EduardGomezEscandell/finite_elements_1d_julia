@@ -21,14 +21,14 @@ function solve_simple_laplacian(nelems::Integer, polynomial_order::Integer, n_ga
     elements = ("Laplacian", polynomial_order, nelems)
     left_bc  = ("Dirichlet", 1.0)       # Left boundary condition
     right_bc = ("Dirichlet", 1.0)       # Right boundary condition
-    source(x) = 3                       # Source term f
-    diffusivity(x) = 2                  # Diffusivity constant k
+    s(x) = 3                            # Source term
+    μ(x) = 2                            # Diffusivity constant
 
     mesh = generate_mesh(length, elements, left_bc, right_bc)
     gauss_data = get_gauss_quadrature(n_gauss)
     shape_functions = compute_shape_functions(polynomial_order, gauss_data)
     builder_and_solver = BuilderAndSolver(mesh)
-    build(builder_and_solver, shape_functions, gauss_data, diffusivity, source)
+    build(builder_and_solver, shape_functions, gauss_data; μ=μ, s=s)
     return solve(builder_and_solver)
 end
 

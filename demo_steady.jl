@@ -39,9 +39,8 @@ function demo_steady_main()
     bns = BuilderAndSolver(mesh)
     println("Preliminaries completed")
 
-
     # Assembly
-    build(bns, shape_functions, gauss_data, μ, s)
+    build(bns, shape_functions, gauss_data, μ=μ, s=s)
     println("Assembly completed")
 
     # Solution
