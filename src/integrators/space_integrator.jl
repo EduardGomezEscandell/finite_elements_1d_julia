@@ -89,8 +89,7 @@ function build_mass_matrix(self::SpaceIntegrator; kwargs...)::Tuple{SparseMatrix
     return to_csc(M_ff), to_csc(M_fl)
 end
 
-function solve(self::SpaceIntegrator, system::SystemOfEquations)::Vector{Float64}
-    solve(system)
+function reconstruct_solution(self::SpaceIntegrator, system::SystemOfEquations)::Vector{Float64}
 
     free_dofs   = map(n -> n.id, filter(n ->  n.dof.free, self.mesh.nodes))
     locked_dofs = map(n -> n.id, filter(n -> !n.dof.free, self.mesh.nodes))

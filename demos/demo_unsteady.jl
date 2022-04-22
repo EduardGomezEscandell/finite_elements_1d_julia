@@ -61,7 +61,7 @@ function demo_unsteady_main()
         step = kwargs[:step]
         time = kwargs[:time]
         @info "TimeIntegratorThetaMethod: Solved step $(step) t=$(time)"
-        display(plot_step(plotter, u; title = "'Solution at t=$(floor(1000*time)/1000)s'"))#, yrange=(-1.1, 1.1)))
+        display(plot_step(plotter, u; title = "'Solution at t=$(floor(1000*time)/1000)s'", yrange=(-1.1, 1.1)))
         sleep(wallclock_wait_time)
     end
 

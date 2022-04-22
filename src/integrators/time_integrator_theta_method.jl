@@ -1,3 +1,7 @@
+#=
+This time integrator solves the transient equation using the theta method.
+=#
+
 include("space_integrator.jl")
 
 struct TimeIntegratorThetaMethod
@@ -92,7 +96,8 @@ function integrate(self::TimeIntegratorThetaMethod, end_of_step_hook::Function =
         system = time_integration_function(self, time, Δt, u_f; kwargs...)
 
         # Solution
-        u = solve(self.space_integrator, system)
+        solve(system)
+        u = reconstruct_solution(self.space_integrator, system)
 
         end_of_step_hook(u; time=time, step=step)
     end

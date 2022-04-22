@@ -1,3 +1,7 @@
+#=
+This time integrator solves the steady-state equation (i.e. no inertial terms) for various values of time.
+=#
+
 include("space_integrator.jl")
 
 struct TimeIntegratorQuasiStatic
@@ -18,7 +22,8 @@ function integrate(self::TimeIntegratorQuasiStatic, end_of_step_hook::Function =
         system = SystemOfEquations(K_ff, K_fl, U_l, U_f, F_b)
 
         # Solution
-        u = solve(self.space_integrator, system)
+        solve(system)
+        u = reconstruct_solution(self.space_integrator, system)
 
         end_of_step_hook(u; time=time, step=step)
     end

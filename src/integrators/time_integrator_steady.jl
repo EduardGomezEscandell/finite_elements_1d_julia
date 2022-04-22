@@ -1,3 +1,7 @@
+#=
+This time integrator solves the steady-state equation at t=0.
+=#
+
 include("space_integrator.jl")
 
 struct TimeIntegratorSteady
@@ -12,7 +16,8 @@ function integrate(self::TimeIntegratorSteady, end_of_step_hook::Function = (u::
     system = SystemOfEquations(K_ff, K_fl, U_l, U_f, F_b)
 
     # Solution
-    u = solve(self.space_integrator, system)
+    solve(system)
+    u = reconstruct_solution(self.space_integrator, system)
 
     end_of_step_hook(u)
     return u
