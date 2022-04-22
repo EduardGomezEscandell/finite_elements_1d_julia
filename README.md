@@ -13,11 +13,11 @@ You can also use `bash install_dependencies.sh` and this will be done automatica
 ## How to run
 Open the demo file and edit the settings to your liking. Then use:
 ```bash
-julia -i demo.jl
+julia -i demo_steady.jl
 ```
 or
 ```bash
-bash demo.jl
+bash demo_steady.jl
 ```
 The following figure should pop up:
 
@@ -26,6 +26,6 @@ The following figure should pop up:
 
 After either of these, a julia interactive session will stay open, and you can subsequently call
 ```julia
-julia> include("demo.jl")
+julia> include("demo_steady.jl")
 ```
 after changing any of the settings to avoid recompiling Gaston, the plotting library.
