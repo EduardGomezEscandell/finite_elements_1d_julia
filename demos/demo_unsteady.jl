@@ -20,7 +20,7 @@
 
 include("../src/all.jl")
 
-function demo_quasi_static_main()
+function demo_unsteady_main()
     println("Starting Finite Element program")
 
     ## Settings
@@ -86,4 +86,4 @@ function demo_quasi_static_main()
 end
 
 
-demo_quasi_static_main()
+demo_unsteady_main()
