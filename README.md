@@ -6,8 +6,7 @@ Currently, only the Poisson equation is implemented, both its time-dependent and
 state versions, but the program is easily extendable to other partial derivative equations.
 
 You can choose between diferent polynomial interpolations and diferent quadrature orders.
-You can also chose between Neumann and Dirichlet boundary conditions.
-
+You can also choose between Neumann and Dirichlet boundary conditions.
 
 ### Dependencies
 You need to install the `Gaston` package and `GNUplot`:
