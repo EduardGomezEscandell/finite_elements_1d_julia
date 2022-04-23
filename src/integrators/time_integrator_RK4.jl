@@ -18,19 +18,19 @@ function runge_kutta_4_step(self::TimeIntegratorRK4, u_old::Vector{Float64}, t_o
     Minv = invert_mass_matrix(self, u_old, t_old+0.5*Δt)
 
     θ = 0.0
-    (k_1, _) = runge_kutta_substep(self, Minv, u0_f, t_old, θ*Δt; kwargs...)
+    (k_1, _) = runge_kutta_substep(self, Minv, u0_f, t_old, θ*Δt; u=u_old, kwargs...)
     uf = u0_f + θ*Δt*k_1
 
     θ = 0.5
-    (k_2, _) = runge_kutta_substep(self, Minv, uf, t_old, θ*Δt; kwargs...)
+    (k_2, _) = runge_kutta_substep(self, Minv, uf, t_old, θ*Δt; u=u_old, kwargs...)
 
     θ = 0.5
     uf = u0_f + θ*Δt*k_2
-    (k_3, _) = runge_kutta_substep(self, Minv, uf, t_old, θ*Δt; kwargs...)
+    (k_3, _) = runge_kutta_substep(self, Minv, uf, t_old, θ*Δt; u=u_old, kwargs...)
 
     θ = 1.0
     uf = u0_f + θ*Δt*k_3
-    (k_4, u_l) = runge_kutta_substep(self, Minv, uf, t_old, θ*Δt; kwargs...)
+    (k_4, u_l) = runge_kutta_substep(self, Minv, uf, t_old, θ*Δt; u=u_old, kwargs...)
 
     Δu_f = Δt * (k_1 + 2*k_2 + 2*k_3 + k_4) / 6
     return (u0_f + Δu_f, u_l)

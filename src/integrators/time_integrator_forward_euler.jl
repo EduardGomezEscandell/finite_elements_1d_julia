@@ -44,7 +44,7 @@ function integrate(self::TimeIntegratorForwardEuler, end_of_step_hook::Function 
 
     for (step, time) in enumerate(LinRange(0, self.time_duration, self.number_of_steps))
         # Assembly
-        (u_f, u_l) = forward_euler_step(self, u, time, Δt; kwargs...)
+        (u_f, u_l) = forward_euler_step(self, u, time, Δt; u=u, kwargs...)
         u = reconstruct_solution(self.space_integrator, u_f, u_l)
 
         end_of_step_hook(u; time=time, step=step)

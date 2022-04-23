@@ -2,8 +2,11 @@
 This is a toy project as a first contact with the Julia programming language.
 
 It solves partial derivative equations in a 1D domain using the Finite Element Method.
-Currently, only the Poisson equation is implemented, both its time-dependent and steady
-state versions, but the program is easily extendable to other partial derivative equations.
+Currently, the following equations are implemented:
+- Poisson (pure diffusion)
+- Convection-diffusion
+- Burger's equation
+The program is easily extendable to other partial derivative equations.
 
 You can choose between diferent polynomial interpolations and diferent quadrature orders.
 You can also choose between Neumann and Dirichlet boundary conditions.
@@ -83,4 +86,4 @@ To solve the partitioned system of equations, the following expression is follow
 Class SystemOfEquations is in charge of solving for Uf.
 
 ### Elements
-They are in charge of computing local matrices `M`, `L` and vector `F`. The use Gauss quadrature to integrate them.
+They are in charge of computing local matrices `M`, `L` and vector `F`. The can use Gauss or Gauss-Lobatto quadrature to integrate them.

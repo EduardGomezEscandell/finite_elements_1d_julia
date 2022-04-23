@@ -92,7 +92,7 @@ function integrate(self::TimeIntegratorThetaMethod, end_of_step_hook::Function =
     for (step, time) in enumerate(LinRange(0, self.time_duration, self.number_of_steps))
         # Assembly
         u_f = extract_free_dof_solution(self, u)
-        system = time_integration_function(self, time, Δt, u_f; kwargs...)
+        system = time_integration_function(self, time, Δt, u_f; u=u, kwargs...)
 
         # Solution
         solve(system)
