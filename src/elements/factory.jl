@@ -1,5 +1,6 @@
 include("element.jl")
 include("laplacian_element.jl")
+include("convection_diffusion_element.jl")
 
 function ElementFactory(
     name::String,
@@ -8,6 +9,8 @@ function ElementFactory(
 
     if name == "Laplacian"
         return LaplacianElement(id, nodes)
+    elseif name=="ConvectionDiffusion"
+        return ConvectionDiffusionElement(id, nodes)
     end
 
     error("Unknown element type: $(name)")
