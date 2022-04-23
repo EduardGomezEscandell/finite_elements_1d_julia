@@ -23,13 +23,13 @@ function get_time_integration_function(self::TimeIntegratorThetaMethod)::Functio
         @info "TimeIntegratorThetaMethod: Selected Forward Euler"
         θ = 0
         return (self::TimeIntegratorThetaMethod, t_old::Float64, Δt::Float64, Uf_old::Vector{Float64}; kwargs...) -> begin
+            (K_ff, K_fl, F_f, U_f, U_l) = build_diferential_and_source(self.space_integrator; t=t_old, Δt=Δt, kwargs...)
+            rhs_f  = Δt*(F_f - K_ff*Uf_old - K_fl*U_l)
+
             (M_ff, M_fl) = build_mass_matrix(self.space_integrator; t=t_old, Δt=Δt, kwargs...)
             lhs_ff = M_ff
             lhs_fl = M_fl
-            rhs_f  = M_ff*Uf_old
-
-            (K_ff, _, F_f, U_f, U_l) = build_diferential_and_source(self.space_integrator; t=t_old, Δt=Δt, kwargs...)
-            rhs_f  += Δt*(F_f - K_ff*Uf_old)
+            rhs_f  += M_ff*Uf_old + M_fl*U_l
             return SystemOfEquations(lhs_ff, lhs_fl, rhs_f, U_f, U_l)
         end
     end
@@ -38,15 +38,15 @@ function get_time_integration_function(self::TimeIntegratorThetaMethod)::Functio
         @info "TimeIntegratorThetaMethod: Selected Backward Euler"
         θ = 1
         return (self::TimeIntegratorThetaMethod, t_old::Float64, Δt::Float64, Uf_old::Vector{Float64}; kwargs...) -> begin
-            (M_ff, M_fl) = build_mass_matrix(self.space_integrator; t=t_old+Δt, Δt=Δt, kwargs...)
-            lhs_ff = M_ff
-            lhs_fl = M_fl
-            rhs_f  = M_ff*Uf_old
-
             (K_ff, K_fl, F_f, U_f, U_l) = build_diferential_and_source(self.space_integrator; t=t_old+Δt, Δt=Δt, kwargs...)
-            lhs_ff += Δt*K_ff
-            lhs_fl += Δt*K_fl
-            rhs_f  += Δt*F_f
+            lhs_ff = Δt*K_ff
+            lhs_fl = Δt*K_fl
+            rhs_f  = Δt*F_f
+
+            (M_ff, M_fl) = build_mass_matrix(self.space_integrator; t=t_old+Δt, Δt=Δt, kwargs...)
+            lhs_ff += M_ff
+            lhs_fl += M_fl
+            rhs_f  += M_ff*Uf_old + M_fl*U_l
             return SystemOfEquations(lhs_ff, lhs_fl, rhs_f, U_f, U_l)
         end
     end
@@ -54,21 +54,20 @@ function get_time_integration_function(self::TimeIntegratorThetaMethod)::Functio
     #Crank-Nicolson if θ = 0.5, arbitrary θ-method otherwise
     @info "TimeIntegratorThetaMethod: Selected θ-method with θ=$(θ)"
     return (self::TimeIntegratorThetaMethod, t_old::Float64, Δt::Float64, Uf_old::Vector{Float64}; kwargs...) -> begin
-        (M_ff, M_fl) = build_mass_matrix(self.space_integrator; t=t_old+0.5*Δt, Δt=Δt, kwargs...)
-        lhs_ff = M_ff
-        lhs_fl = M_fl
-        rhs_f  = M_ff*Uf_old
-
-        (K_ff, _, F_f, _, _) = build_diferential_and_source(self.space_integrator; t=t_old, Δt=Δt, kwargs...)
-        χ = (1-θ)*Δt
-        rhs_f  += χ*(F_f - K_ff*Uf_old)
-
         (K_ff, K_fl, F_f, U_f, U_l) = build_diferential_and_source(self.space_integrator; t=t_old+Δt, Δt=Δt, kwargs...)
         χ = θ*Δt
-        lhs_ff += χ*K_ff
-        lhs_fl += χ*K_fl
-        rhs_f  += χ*F_f
+        lhs_ff = χ*K_ff
+        lhs_fl = χ*K_fl
+        rhs_f  = χ*F_f
 
+        (K_ff, K_fl, F_f, _, Ul_old) = build_diferential_and_source(self.space_integrator; t=t_old, Δt=Δt, kwargs...)
+        χ = (1-θ)*Δt
+        rhs_f  += χ*(F_f - K_ff*Uf_old - K_fl*Ul_old)
+
+        (M_ff, M_fl) = build_mass_matrix(self.space_integrator; t=t_old+0.5*Δt, Δt=Δt, kwargs...)
+        lhs_ff += M_ff
+        lhs_fl += M_fl
+        rhs_f  += M_ff*Uf_old + M_fl*Ul_old
         return SystemOfEquations(lhs_ff, lhs_fl, rhs_f, U_f, U_l)
     end
 end

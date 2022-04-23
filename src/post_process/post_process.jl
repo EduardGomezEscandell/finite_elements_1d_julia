@@ -42,7 +42,7 @@ function plot_step(self::Plotter, solution::Vector{Float64}; axes_kwargs...)
         U = vcat(U, [d[2] for d in datapoints])
     end
 
-    return plot(X, U, w  = :l,
+    return plot(X, U, w=:l,
         Axes(grid = :on, xlabel = "'x'" , ylabel = "'u(x)'", key = :off; axes_kwargs...),
     )
 end

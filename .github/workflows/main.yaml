@@ -22,4 +22,4 @@ jobs:
           julia_version: 1.4.1
 
       - name: Test
-        run: julia test/dirchlet_uniform_properties.jl
+        run: julia "test/all_tests.jl"
