@@ -32,9 +32,9 @@ julia> include("demos/demo_steady.jl")
 ```
 after changing any of the settings to avoid recompiling Gaston, the plotting library.
 
-The same process works for the other demos. For instance, here is the result for `demos/demo_unsteady.jl`:
+The same process works for the other demos. For instance, here is the result for `demos/demo_unsteady_implicit.jl`:
 
-![demos/demo_unsteady.jl](https://user-images.githubusercontent.com/47142856/164744229-e9387896-5b54-42c4-b86e-17ea35298d0c.gif)
+![demos/demo_unsteady_implicit.jl](https://user-images.githubusercontent.com/47142856/164744229-e9387896-5b54-42c4-b86e-17ea35298d0c.gif)
 
 ## General Structure
 ### Time integrator
@@ -50,7 +50,7 @@ by discretizing the previous equation in space, with help of shape functions `w`
 This generates two matrices and a vector, one for each term: `M`, `L` and `F`. Depending on the time integrator, these matrices are evaulated
 at one ore more points in time. For instance, with a Forward-Euler time scheme we get:
 ```
-        M(t_old)*U(t) = Δt*F(t_old) + (M(t_old) - Δt*K(t_old)) U(t_old)
+        M(t_old)*U(t) = Δt*F(t_old) + (M(t_old) - Δt*K(t_old))*U(t_old)
 ```
 
 Hence:
