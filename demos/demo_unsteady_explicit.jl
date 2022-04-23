@@ -29,27 +29,27 @@ function demo_unsteady_main()
     ## Settings
     # Time settings
     scheme::Scheme = RUNGE_KUTTA_4
-    t_end   = 20                      # Start time
-    n_steps = 150                       # Number of time steps
+    t_end   = 10.0                      # Start time
+    n_steps = 100                       # Number of time steps
 
     # Space settings
-    length = 3.0                        # Size of the domain
-    nelems = 12                         # Number of elements
-    polynomial_order = 1                # Polynomial order of the elements
-    n_gauss_numerical = 6               # Gauss interpolation for integration
+    length = 1.0                        # Size of the domain
+    nelems = 10                         # Number of elements
+    polynomial_order = 3                # Polynomial order of the elements
+    n_gauss_numerical = 4               # Gauss interpolation for integration
 
     # Plotting settings
     n_gauss_plotting = 7                # Gauss interpolation for plotting solution
-    wallclock_wait_time = 0          # Time between frames
+    wallclock_wait_time = 1/12          # Time between frames
 
     # Domain settings
-    left_bc  = "Dirichlet", 1.0         # Left boundary condition
-    right_bc = "Dirichlet", 1.0           # Right boundary condition
+    left_bc  = "Dirichlet", 0.0         # Left boundary condition
+    right_bc = "Neumann", 0.0           # Right boundary condition
 
     # Physical settings
-    μ(t, x) = 0.3                      # Diffusivity constant
-    s(t, x) = 3               # Source term
-    u0(x) = 1.0               # Initial condition
+    μ(t, x) = 1e-3                      # Diffusivity constant
+    s(t, x) = 0.1/(1 + t)               # Source term
+    u0(x) = sin.(9.5*pi*x)              # Initial condition
 
     ## Meshing
     mesh = generate_mesh(length, ("Laplacian", polynomial_order, nelems), left_bc, right_bc)
@@ -79,10 +79,8 @@ function demo_unsteady_main()
     plotter = Plotter(mesh, n_gauss_plotting)
 
     end_of_step_hook = (u; kwargs...) -> begin
-        step = kwargs[:step]
         time = kwargs[:time]
-        # @info "Solved step $(step) t=$(time)"
-        display(plot_step(plotter, u; title = "'Solution at t=$(floor(1000*time)/1000)s'"))
+        display(plot_step(plotter, u; title = "'Solution at t=$(floor(1000*time)/1000)s'", yrange=(-1.1, 1.1)))
         sleep(wallclock_wait_time)
     end
 
