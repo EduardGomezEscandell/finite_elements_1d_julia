@@ -1,2 +1,4 @@
-include("dirchlet_steady_uniform_properties.jl")
-include("dirchlet_theta_uniform_properties.jl")
+include("laplacian_steady.jl")
+include("laplacian_theta.jl")
+include("laplacian_forward_euler.jl")
+include("laplacian_RK4.jl")

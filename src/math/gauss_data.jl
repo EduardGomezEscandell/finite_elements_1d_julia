@@ -43,3 +43,18 @@ function get_gauss_quadrature(npoints::Integer)::GaussData
     end
     error("Gauss quadrature not implemented for npoints = ", npoints)
 end
+
+function get_lobatto_quadrature(npoints::Integer)::GaussData
+    midpoint_mass = 2 / (npoints - 1)
+    endpoint_mass = 1 / (npoints - 1)
+
+    weights = zeros(Float64, npoints)
+    weights[1] = endpoint_mass
+    weights[npoints] = endpoint_mass
+    weights[2:(npoints - 1)] .= midpoint_mass
+
+    return GaussData(npoints,
+        weights,
+        LinRange(-1.0, 1.0, npoints),
+    )
+end

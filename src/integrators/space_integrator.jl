@@ -89,13 +89,33 @@ function build_mass_matrix(self::SpaceIntegrator; kwargs...)::Tuple{SparseMatrix
     return to_csc(M_ff), to_csc(M_fl)
 end
 
+function build_lumped_mass_matrix(self::SpaceIntegrator; kwargs...)::Tuple{SparseMatrixCSC{Float64}, SparseMatrixCSC{Float64}}
+    M_ff = DokMatrix(self.free_counter, self.free_counter)
+    M_fl = DokMatrix(self.free_counter, self.lock_counter)
+
+    shape_fun = ShapeFunctions(self.mesh.shape_functions)
+    gauss_data = get_lobatto_quadrature(shape_fun.order+1)
+    cache(shape_fun, gauss_data)
+
+
+    for e in self.mesh.elems
+        M = calculate_M(e, shape_fun, gauss_data; kwargs...)
+        local_assembly(e.nodes, M, M_ff, M_fl)
+    end
+    return to_csc(M_ff), to_csc(M_fl)
+end
+
 function reconstruct_solution(self::SpaceIntegrator, system::SystemOfEquations)::Vector{Float64}
+    reconstruct_solution(self, system.u_f, system.u_l)
+end
+
+function reconstruct_solution(self::SpaceIntegrator, u_f::Vector{Float64}, u_l::Vector{Float64})::Vector{Float64}
 
     free_dofs   = map(n -> n.id, filter(n ->  n.dof.free, self.mesh.nodes))
     locked_dofs = map(n -> n.id, filter(n -> !n.dof.free, self.mesh.nodes))
 
     u = zeros(Float64, size(self.mesh.nodes))
-    u[free_dofs] = system.u_f
-    u[locked_dofs] = system.u_l
+    u[free_dofs] = u_f
+    u[locked_dofs] = u_l
     return u
 end
