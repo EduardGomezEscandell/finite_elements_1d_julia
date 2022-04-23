@@ -35,6 +35,7 @@ function demo_unsteady_main()
     # Plotting settings
     n_gauss_plotting = 7                # Gauss interpolation for plotting solution
     wallclock_wait_time = 1/12          # Time between frames
+    store_to_disk = false
 
     # Domain settings
     left_bc  = "Neumann", 0.0           # Left boundary condition
@@ -64,7 +65,12 @@ function demo_unsteady_main()
 
     end_of_step_hook = (u; kwargs...) -> begin
         time = kwargs[:time]
-        display(plot_step(plotter, u; title = "'Solution at t=$(floor(1000*time)/1000)s'", yrange=(-1.1, 1.1)))
+        step = kwargs[:step]
+        p = plot_step(plotter, u; title = "'Convection-diffusion equation. t=$(floor(1000*time)/1000)s'", yrange=(-0.5, 1.1))
+        display(p)
+        if store_to_disk
+            save(term = "png", saveopts = "size 600,400", output="results/convdiff_$(step).gif")
+        end
         sleep(wallclock_wait_time)
     end
 
