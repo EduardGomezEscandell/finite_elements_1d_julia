@@ -29,7 +29,7 @@ The following figure should pop up:
 ![demos/demo_steady.jl](https://user-images.githubusercontent.com/47142856/164203009-7d13d0b8-6a17-40e2-b03d-a21111d446b0.png)
 
 If no figure pops up, you may be missing `gnuplot` (a warning will show in the console) or you might have run the
-program without the `-i` flag. A julia interactive session will stay open, and you can subsequently call
+program without the `-i` flag. A Julia interactive session will stay open, and you can subsequently call
 ```julia
 julia> include("demos/demo_steady.jl")
 ```
@@ -38,6 +38,17 @@ after changing any of the settings to avoid recompiling Gaston, the plotting lib
 The same process works for the other demos. For instance, here is the result for `demos/demo_unsteady_implicit.jl`:
 
 ![demos/demo_unsteady_implicit.jl](https://user-images.githubusercontent.com/47142856/164744229-e9387896-5b54-42c4-b86e-17ea35298d0c.gif)
+
+Convection-diffusion equation:
+
+![demos/demo_convection_diffusion](https://user-images.githubusercontent.com/47142856/164912633-2ea4d31d-0f8f-41ad-88c8-e4762aee521d.gif)
+
+Here is the Burger's equation:
+
+![demos/demo_burgers.jl](https://user-images.githubusercontent.com/47142856/164912512-a136e5d5-93a7-4115-a5e8-9fd1c39f85b6.gif)
+
+
+
 
 ## General Structure
 ### Time integrator
@@ -50,7 +61,7 @@ by discretizing the previous equation in space, with help of shape functions `w`
 ```
         (w, ∂u/∂t) - (w, L(u)u) = (w, s)
 ```
-This generates two matrices and a vector, one for each term: `M`, `L` and `F`. Depending on the time integrator, these matrices are evaulated
+This generates two matrices and a vector, one for each term: `M`, `L`, and `F`. Depending on the time integrator, these matrices are evaluated
 at one ore more points in time. For instance, with a Forward-Euler time scheme we get:
 ```
         M(t_old)*U(t) = Δt*F(t_old) + (M(t_old) - Δt*K(t_old))*U(t_old)
@@ -86,4 +97,4 @@ To solve the partitioned system of equations, the following expression is follow
 Class SystemOfEquations is in charge of solving for Uf.
 
 ### Elements
-They are in charge of computing local matrices `M`, `L` and vector `F`. The can use Gauss or Gauss-Lobatto quadrature to integrate them.
+They are in charge of computing local matrices `M`, `L` and vector `F`. They use Gauss quadrature to integrate them.
