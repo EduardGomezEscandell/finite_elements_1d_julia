@@ -98,3 +98,7 @@ Class SystemOfEquations is in charge of solving for Uf.
 
 ### Elements
 They are in charge of computing local matrices `M`, `L` and vector `F`. They use Gauss quadrature to integrate them.
+
+
+# Known issues
+Explicit time integrators do not work with non-linear elements.
