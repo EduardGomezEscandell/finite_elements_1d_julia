@@ -22,7 +22,7 @@ function time_integrator_factory(name::String, space_integrator::SpaceIntegrator
         ("steady", LazyConstructor(TimeIntegratorSteady))
         ("quasistatic", LazyConstructor(TimeIntegratorQuasiStatic))
         ("theta-method", LazyConstructor(TimeIntegratorThetaMethod))
-        ("crank-nicholson", LazyConstructor(TimeIntegratorThetaMethod; θ=0.5))
+        ("crank-nicolson", LazyConstructor(TimeIntegratorThetaMethod; θ=0.5))
         ("backward-euler", LazyConstructor(TimeIntegratorThetaMethod; θ=0.5))
         ("forward-euler", LazyConstructor(TimeIntegratorForwardEuler))
         ("rk3", LazyConstructor(TimeIntegratorRK3))

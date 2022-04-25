@@ -22,8 +22,7 @@ function demo_unsteady_main()
 
     ## Settings
     # Time settings
-    scheme = "theta-method"
-    θ = 0.66                            # Time integration point: θ ∈ [0, 1], used if scheme is "theta-method"
+    scheme = "crank-nicolson"
     t_end   = 10.0                      # Start time
     n_steps = 100                       # Number of time steps
 
@@ -61,7 +60,7 @@ function demo_unsteady_main()
 
     # Chosing tools
     space_integrator = SpaceIntegrator(mesh, n_gauss_numerical)
-    time_integrator = time_integrator_factory(scheme, space_integrator; t_end=t_end, n_steps=n_steps, θ=θ)
+    time_integrator = time_integrator_factory(scheme, space_integrator; t_end=t_end, n_steps=n_steps)
     plotter = Plotter(mesh, n_gauss_plotting)
 
     end_of_step_hook = (u; kwargs...) -> begin

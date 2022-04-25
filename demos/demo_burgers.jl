@@ -21,7 +21,7 @@ function demo_unsteady_main()
 
     ## Settings
     # Time settings
-    scheme = "backward-euler"
+    scheme = "rk3"
     t_end   = 10.0                      # Start time
     n_steps = 100                       # Number of time steps
 
