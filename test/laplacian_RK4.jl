@@ -12,7 +12,7 @@
 #
 # By t=10 the solution has converged to this value
 
-include("../src/integrators/time_integrators/time_integrator_forward_euler.jl")
+include("../src/integrators/time_integrators/time_integrator_RK4.jl")
 
 using Test
 
@@ -45,7 +45,7 @@ end
 
 analytical(x::Float64)::Float64 = x*(1 - x)*3/0.4 + 1
 
-@testset "Runge Kutta 4 method" begin
+@testset "Runge Kutta 4" begin
     # First order polynomials,
     U = solve_simple_laplacian_RK4(1)
     @test size(U, 1) == 13

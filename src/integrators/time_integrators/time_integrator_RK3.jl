@@ -37,7 +37,7 @@ function solve_step(self::TimeIntegratorRK3, u_old::Vector{Float64}, t_old::Floa
     u0_f = extract_free_dof_solution(self, u_old)
     Minv = invert_mass_matrix(self, u_old, t_old+0.5*Δt)
 
-    K = zeros(size(u_old, 1), nsubsteps)
+    K = zeros(size(u0_f, 1), nsubsteps)
 
     A = get_butcher_tableau_A(self)
     C = get_butcher_tableau_C(self)

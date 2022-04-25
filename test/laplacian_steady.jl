@@ -11,7 +11,7 @@
 #     u(x) = 1 + 3/4*x*(1 - x)
 #
 
-include("../src/integrators/time_integrators/time_integrator_forward_euler.jl")
+include("../src/integrators/time_integrators/time_integrator_steady.jl")
 
 using Test
 

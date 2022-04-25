@@ -12,8 +12,7 @@
 #
 # By t=10 the solution has converged to this value
 
-include("../src/integrators/time_integrators/time_integrator_forward_euler.jl")
-
+include("../src/integrators/time_integrators/time_integrator_RK3.jl")
 
 using Test
 
@@ -23,7 +22,7 @@ function ensure_fourier_below(fourier::Float64, Δx::Float64, t_end::Float64, μ
     return n_steps
 end
 
-function solve_simple_laplacian_forward_euler(polynomial_order::Integer)::Vector{Float64}
+function solve_simple_laplacian_RK4(polynomial_order::Integer)::Vector{Float64}
     # Problem-specific settings
     length = 1.0                        # Size of the domain
     t_end  = 20.0
@@ -39,16 +38,16 @@ function solve_simple_laplacian_forward_euler(polynomial_order::Integer)::Vector
     mesh = generate_mesh(length, elements, left_bc, right_bc)
 
     space_integrator = SpaceIntegrator(mesh, polynomial_order+1)
-    time_integrator = TimeIntegratorForwardEuler(space_integrator, t_end, n_steps)
+    time_integrator = TimeIntegratorRK3(space_integrator, t_end, n_steps)
 
     return integrate(time_integrator; s=s, μ=μ, u0=u0)
 end
 
 analytical(x::Float64)::Float64 = x*(1 - x)*3/0.4 + 1
 
-@testset "Forward Euler" begin
+@testset "Runge Kutta 3" begin
     # First order polynomials,
-    U = solve_simple_laplacian_forward_euler(1)
+    U = solve_simple_laplacian_RK4(1)
     @test size(U, 1) == 13
     for (u, x) in zip(U, LinRange(0, 1, size(U, 1)))
         @test u ≈ analytical(x)   atol=0.01
@@ -57,14 +56,14 @@ analytical(x::Float64)::Float64 = x*(1 - x)*3/0.4 + 1
     # Higher order polynomials fail
 
     # Second order polynomials
-    # U = solve_simple_laplacian_forward_euler(2)
+    # U = solve_simple_laplacian_RK4(2)
     # @test size(U, 1) == 13
     # for (u, x) in zip(U, LinRange(0, 1, size(U, 1)))
     #     @test u ≈ analytical(x)   atol=0.01
     # end
 
     # # Third order polynomials,
-    # U = solve_simple_laplacian_forward_euler(3)
+    # U = solve_simple_laplacian_RK4(3)
     # @test size(U, 1) == 13
     # for (u, x) in zip(U, LinRange(0, 1, size(U, 1)))
     #     @test u ≈ analytical(x)   atol=0.01

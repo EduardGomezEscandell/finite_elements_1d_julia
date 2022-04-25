@@ -12,7 +12,7 @@
 #
 # By t=10 the solution has converged to this value
 
-include("../src/integrators/time_integrators/time_integrator_forward_euler.jl")
+include("../src/integrators/time_integrators/time_integrator_theta_method.jl")
 
 using Test
 
