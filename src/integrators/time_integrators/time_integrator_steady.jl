@@ -6,11 +6,9 @@ include("time_integrator.jl")
 
 struct TimeIntegratorSteady <: TimeIntegrator
     space_integrator::SpaceIntegrator
+    TimeIntegratorSteady(space_integrator::SpaceIntegrator, _...) = new(space_integrator)
 end
 
-function TimeIntegratorSteady(space_integrator::SpaceIntegrator, kwargs...)::TimeIntegrator
-    return TimeIntegratorSteady(space_integrator)
-end
 
 function integrate(self::TimeIntegratorSteady, end_of_step_hook::Function = (u::Vector{Float64}) -> nothing ; kwargs...)::Vector{Float64}
     # Assembly
