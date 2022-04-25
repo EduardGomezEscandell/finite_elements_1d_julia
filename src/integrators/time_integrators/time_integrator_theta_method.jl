@@ -2,13 +2,17 @@
 This time integrator solves the transient equation using the theta method.
 =#
 
-include("space_integrator.jl")
+include("time_integrator.jl")
 
-struct TimeIntegratorThetaMethod
+struct TimeIntegratorThetaMethod <: TimeIntegrator
     space_integrator::SpaceIntegrator
     time_duration::Float64
     number_of_steps::Integer
     θ::Float64
+end
+
+function TimeIntegratorThetaMethod(space_integrator::SpaceIntegrator; t_end::Float64, n_steps::Integer, θ::Float64, kwargs...)::TimeIntegratorThetaMethod
+    return TimeIntegratorThetaMethod(space_integrator, t_end, n_steps, θ)
 end
 
 function get_time_integration_function(self::TimeIntegratorThetaMethod)::Function
@@ -20,7 +24,6 @@ function get_time_integration_function(self::TimeIntegratorThetaMethod)::Functio
     end
 
     if θ <= ε  # Forward Euler: θ ≈ 0
-        @info "TimeIntegratorThetaMethod: Selected Forward Euler"
         θ = 0
         return (self::TimeIntegratorThetaMethod, t_old::Float64, Δt::Float64, Uf_old::Vector{Float64}; kwargs...) -> begin
             (K_ff, K_fl, F_f, U_f, U_l) = build_diferential_and_source(self.space_integrator; t=t_old, Δt=Δt, kwargs...)
@@ -35,7 +38,6 @@ function get_time_integration_function(self::TimeIntegratorThetaMethod)::Functio
     end
 
     if θ-1 >= -ε  # Backward Euler: θ ≈ 1
-        @info "TimeIntegratorThetaMethod: Selected Backward Euler"
         θ = 1
         return (self::TimeIntegratorThetaMethod, t_old::Float64, Δt::Float64, Uf_old::Vector{Float64}; kwargs...) -> begin
             (K_ff, K_fl, F_f, U_f, U_l) = build_diferential_and_source(self.space_integrator; t=t_old+Δt, Δt=Δt, kwargs...)
@@ -52,7 +54,6 @@ function get_time_integration_function(self::TimeIntegratorThetaMethod)::Functio
     end
 
     #Crank-Nicolson if θ = 0.5, arbitrary θ-method otherwise
-    @info "TimeIntegratorThetaMethod: Selected θ-method with θ=$(θ)"
     return (self::TimeIntegratorThetaMethod, t_old::Float64, Δt::Float64, Uf_old::Vector{Float64}; kwargs...) -> begin
         (K_ff, K_fl, F_f, U_f, U_l) = build_diferential_and_source(self.space_integrator; t=t_old+Δt, Δt=Δt, kwargs...)
         χ = θ*Δt
@@ -72,34 +73,14 @@ function get_time_integration_function(self::TimeIntegratorThetaMethod)::Functio
     end
 end
 
-function extract_free_dof_solution(self::TimeIntegratorThetaMethod, u::Vector{Float64})::Vector{Float64}
-    free_nodes = map(node -> node.id, filter(node -> node.dof.free, self.space_integrator.mesh.nodes))
-    return u[free_nodes]
-end
-
-function integrate(self::TimeIntegratorThetaMethod, end_of_step_hook::Function = (u::Vector{Float64}; kwargs...) -> nothing ; kwargs...)::Vector{Float64}
-    # Assembly
-    initialize(self.space_integrator)
-    Δt = self.time_duration / self.number_of_steps
-
-    u = kwargs[:u0]([node.x for node in self.space_integrator.mesh.nodes])
-    if isa(u, Number)
-        u = u.* ones(size(self.space_integrator.mesh.nodes))
-    end
-
+function solve_step(self::TimeIntegratorThetaMethod, u_old::Vector{Float64}, t_old::Float64, Δt::Float64; kwargs...)::Tuple{Vector{Float64}, Vector{Float64}}
     time_integration_function = get_time_integration_function(self)
 
-    for (step, time) in enumerate(LinRange(0, self.time_duration, self.number_of_steps))
-        # Assembly
-        u_f = extract_free_dof_solution(self, u)
-        system = time_integration_function(self, time, Δt, u_f; u=u, kwargs...)
+    # Assembly
+    u_f = extract_free_dof_solution(self, u_old)
+    system = time_integration_function(self, t_old, Δt, u_f; u=u_old, kwargs...)
 
-        # Solution
-        solve(system)
-        u = reconstruct_solution(self.space_integrator, system)
-
-        end_of_step_hook(u; time=time, step=step)
-    end
-
-    return u
+    # Solution
+    solve(system)
+    return (system.u_f, system.u_l)
 end

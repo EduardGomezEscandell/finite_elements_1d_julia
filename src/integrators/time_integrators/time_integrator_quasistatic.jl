@@ -2,12 +2,16 @@
 This time integrator solves the steady-state equation (i.e. no inertial terms) for various values of time.
 =#
 
-include("space_integrator.jl")
+include("time_integrator.jl")
 
-struct TimeIntegratorQuasiStatic
+struct TimeIntegratorQuasiStatic <: TimeIntegrator
     space_integrator::SpaceIntegrator
     time_duration::Float64
     number_of_steps::Integer
+end
+
+function TimeIntegratorQuasiStatic(space_integrator::SpaceIntegrator; t_end::Float64, n_steps::Integer, kwargs...)::TimeIntegratorQuasiStatic
+    return TimeIntegratorQuasiStatic(space_integrator, t_end, n_steps)
 end
 
 function integrate(self::TimeIntegratorQuasiStatic, end_of_step_hook::Function = (u::Vector{Float64}; kwargs...) -> nothing ; kwargs...)::Vector{Float64}

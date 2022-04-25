@@ -14,7 +14,7 @@
 # ensure the initial condition is consistent with the boundary conditions,
 # otherwise the solution will oscilate.
 
-include("../src/integrators/time_integrator_theta_method.jl")
+include("../src/integrators/time_integrator_factory.jl")
 include("../src/post_process/post_process.jl")
 
 function demo_unsteady_main()
@@ -22,7 +22,8 @@ function demo_unsteady_main()
 
     ## Settings
     # Time settings
-    θ = 0.5                             # Time integration point: θ ∈ [0, 1]
+    scheme = "theta-method"
+    θ = 0.66                            # Time integration point: θ ∈ [0, 1], used if scheme is "theta-method"
     t_end   = 10.0                      # Start time
     n_steps = 100                       # Number of time steps
 
@@ -60,7 +61,7 @@ function demo_unsteady_main()
 
     # Chosing tools
     space_integrator = SpaceIntegrator(mesh, n_gauss_numerical)
-    time_integrator = TimeIntegratorThetaMethod(space_integrator, t_end, n_steps, θ)
+    time_integrator = time_integrator_factory(scheme, space_integrator; t_end=t_end, n_steps=n_steps, θ=θ)
     plotter = Plotter(mesh, n_gauss_plotting)
 
     end_of_step_hook = (u; kwargs...) -> begin

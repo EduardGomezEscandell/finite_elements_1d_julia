@@ -9,7 +9,7 @@
 # u is the unknown
 # They're all functions of x
 
-include("../src/integrators/time_integrator_quasistatic.jl")
+include("../src/integrators/time_integrator_factory.jl")
 include("../src/post_process/post_process.jl")
 
 function demo_quasi_static_main()::Nothing
@@ -44,14 +44,13 @@ function demo_quasi_static_main()::Nothing
 
     # Chosing tools
     space_integrator = SpaceIntegrator(mesh, n_gauss_numerical)
-    time_integrator = TimeIntegratorQuasiStatic(space_integrator, t_end, n_steps)
+    time_integrator = time_integrator_factory("quasistatic", space_integrator; t_end=t_end, n_steps=n_steps)
     plotter = Plotter(mesh, n_gauss_plotting)
 
     end_of_step_hook = (u; kwargs...) -> begin
         step = kwargs[:step]
         time = kwargs[:time]
         @info "TimeIntegratorQuasiStatic: Solved step $(step) t=$(time)"
-        display(plot_step(plotter, u; title =  "'Solution at t=$(time)s'",yrange=(-2, 2)))
         sleep(wallclock_wait_time)
     end
 

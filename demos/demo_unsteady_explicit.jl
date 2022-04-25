@@ -17,18 +17,15 @@
 # ensure the initial condition is consistent with the boundary conditions,
 # otherwise the solution will oscilate.
 
-include("../src/integrators/time_integrator_RK4.jl")
-include("../src/integrators/time_integrator_forward_euler.jl")
+include("../src/integrators/time_integrator_factory.jl")
 include("../src/post_process/post_process.jl")
-
-@enum Scheme FORWARD_EULER RUNGE_KUTTA_4
 
 function demo_unsteady_main()
     @info "Starting Finite Element program"
 
     ## Settings
     # Time settings
-    scheme::Scheme = RUNGE_KUTTA_4
+    scheme = "rk4"
     t_end   = 10.0                      # Start time
     n_steps = 100                       # Number of time steps
 
@@ -60,21 +57,12 @@ function demo_unsteady_main()
     Δt = t_end / n_steps
     μ_max = maximum([μ(0, node.x) for node in mesh.nodes])
     fourier = μ_max * Δt / Δx^2
-    max_fourier = scheme == FORWARD_EULER ? 0.5 : 0.7  # Experimental data
-    if fourier < max_fourier
-        @info "Fourier number: $(fourier)"
-    else
-        @warn "Fourier number beyond stability threshold!: $(fourier) > $(max_fourier)"
-    end
+
+    @info "Fourier number: $(fourier)"
 
     # Chosing tools
     space_integrator = SpaceIntegrator(mesh, n_gauss_numerical)
-
-    if scheme == FORWARD_EULER
-        time_integrator = TimeIntegratorForwardEuler(space_integrator, t_end, n_steps)
-    elseif scheme == RUNGE_KUTTA_4
-        time_integrator = TimeIntegratorRK4(space_integrator, t_end, n_steps)
-    end
+    time_integrator = time_integrator_factory(scheme, space_integrator; t_end=t_end, n_steps=n_steps)
 
     plotter = Plotter(mesh, n_gauss_plotting)
 

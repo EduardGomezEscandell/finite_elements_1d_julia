@@ -9,7 +9,7 @@
 # u is the unknown
 # They're all functions of x
 
-include("../src/integrators/time_integrator_steady.jl")
+include("../src/integrators/time_integrator_factory.jl")
 include("../src/post_process/post_process.jl")
 
 function demo_steady_main()::Nothing
@@ -36,13 +36,13 @@ function demo_steady_main()::Nothing
 
     # Chosing tools
     space_integrator = SpaceIntegrator(mesh, n_gauss_numerical)
-    time_integrator = TimeIntegratorSteady(space_integrator)
+    time_integrator = time_integrator_factory("steady", space_integrator)
     plotter = Plotter(mesh, n_gauss_plotting)
 
     end_of_step_hook = (u; kwargs...) -> display(plot_step(plotter, u; title = "'Solution'"))
 
     # Solving
-    u = integrate(time_integrator, end_of_step_hook; s=s, μ=μ)
+    integrate(time_integrator, end_of_step_hook; s=s, μ=μ)
     @info "Solved"
 
     return nothing
